@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="jLh-Cc-yGy">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--GeneratedRoute-->
+        <scene sceneID="RY2-mc-F65">
+            <objects>
+                <viewController id="Ssm-W1-rgW" customClass="GeneratedRouteViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="2R6-tm-VlW">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="ptj-bq-m8R"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="GeneratedRoute" image="list.bullet" catalog="system" id="1vk-kz-TVa"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="f6H-dR-Zsf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="295" y="-123"/>
+        </scene>
+        <!--MainView-->
+        <scene sceneID="kzY-Qn-bNu">
+            <objects>
+                <viewController id="1uj-Xa-exk" customClass="MainViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="e0b-bQ-ZkV">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="W2h-P0-g48"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="MainView" image="globe.asia.australia.fill" catalog="system" id="Tt0-Cg-C9j"/>
+                    <connections>
+                        <segue destination="sQi-9e-Hi3" kind="show" identifier="goRouteCandidate" id="hem-su-Csq"/>
+                        <segue destination="YAe-rp-0oe" kind="show" identifier="goRouteResult" id="dr3-Pf-gAK"/>
+                        <segue destination="q4D-Rd-6fA" kind="show" identifier="goHelp" id="g7Y-ZG-6Py"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="AGY-nh-ARj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="294" y="-811"/>
+        </scene>
+        <!--Route Result View Controller-->
+        <scene sceneID="4Zy-fe-Las">
+            <objects>
+                <viewController id="YAe-rp-0oe" customClass="RouteResultViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="pzn-fA-bFt">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="beg-lY-izn"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="B3k-ON-294"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dTW-2I-fm4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1190" y="-811"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="3Tg-Xf-BG6">
+            <objects>
+                <tabBarController id="jLh-Cc-yGy" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="OL6-lU-476">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="barTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="selectedImageTintColor" name="AccentColor"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="1uj-Xa-exk" kind="relationship" relationship="viewControllers" id="gEP-Vd-MFD"/>
+                        <segue destination="Ssm-W1-rgW" kind="relationship" relationship="viewControllers" id="quQ-jO-z1d"/>
+                        <segue destination="FRU-MD-1sI" kind="relationship" relationship="viewControllers" id="GRB-f3-PXB"/>
+                        <segue destination="GTg-JB-u7P" kind="relationship" relationship="viewControllers" id="KsM-gf-FaE"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="VDg-ZK-KNz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-612" y="-122"/>
+        </scene>
+        <!--OnlineRoute-->
+        <scene sceneID="Jrx-3r-4kd">
+            <objects>
+                <viewController id="FRU-MD-1sI" customClass="OnlineRouteViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Swa-Cz-H7D">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="dVz-ue-xXo"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="OnlineRoute" image="network" catalog="system" id="5RC-5G-jNp"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="zOH-Tg-Cxb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="294" y="555"/>
+        </scene>
+        <!--Configure-->
+        <scene sceneID="ea8-eL-cqe">
+            <objects>
+                <viewController id="GTg-JB-u7P" customClass="ConfigureViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="zGv-bI-89m">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="5Mt-Bf-XaJ"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Configure" image="dial.medium" catalog="system" id="G0S-AR-yCp"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="eCh-FX-FSU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="294" y="1299"/>
+        </scene>
+        <!--Help View Controller-->
+        <scene sceneID="X0U-RH-kbH">
+            <objects>
+                <viewController id="q4D-Rd-6fA" customClass="HelpViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Dbm-PT-z1Z">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="ciy-Pj-tHB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="7dx-Yt-E1M"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="n9u-i6-W4a" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1189" y="-2174"/>
+        </scene>
+        <!--Route Candidate View Controller-->
+        <scene sceneID="JuB-zn-7fh">
+            <objects>
+                <viewController id="sQi-9e-Hi3" customClass="RouteCandidateViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5gK-Rl-hgd">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="ZBk-sj-rJg"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="dml-1r-pyB"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dXY-r5-Tm4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1189" y="-1499"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="dial.medium" catalog="system" width="128" height="109"/>
+        <image name="globe.asia.australia.fill" catalog="system" width="128" height="123"/>
+        <image name="list.bullet" catalog="system" width="128" height="87"/>
+        <image name="network" catalog="system" width="128" height="123"/>
+        <namedColor name="AccentColor">
+            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

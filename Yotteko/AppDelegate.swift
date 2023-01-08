@@ -5,6 +5,7 @@
 //  Created by Daisuke Doi on 2023/01/07.
 //
 
+
 import UIKit
 
 @main
