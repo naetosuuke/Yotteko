@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5051E7E7296BE0DF00FB18C7 /* CoordinatesArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5051E7E6296BE0DF00FB18C7 /* CoordinatesArray.swift */; };
 		50B717062969726D00EEA972 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B717052969726D00EEA972 /* AppDelegate.swift */; };
 		50B717082969726D00EEA972 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B717072969726D00EEA972 /* SceneDelegate.swift */; };
 		50B7170A2969726D00EEA972 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B717092969726D00EEA972 /* MainViewController.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5051E7E6296BE0DF00FB18C7 /* CoordinatesArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatesArray.swift; sourceTree = "<group>"; };
 		50B717022969726D00EEA972 /* Yotteko.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yotteko.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50B717052969726D00EEA972 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50B717072969726D00EEA972 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -89,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				50B717292969732700EEA972 /* Colors.swift */,
+				5051E7E6296BE0DF00FB18C7 /* CoordinatesArray.swift */,
 			);
 			path = Method;
 			sourceTree = "<group>";
@@ -207,6 +210,7 @@
 				50B7170A2969726D00EEA972 /* MainViewController.swift in Sources */,
 				50B717282969731900EEA972 /* ConfigureViewController.swift in Sources */,
 				50B717262969730B00EEA972 /* OnlineRouteViewController.swift in Sources */,
+				5051E7E7296BE0DF00FB18C7 /* CoordinatesArray.swift in Sources */,
 				50B717062969726D00EEA972 /* AppDelegate.swift in Sources */,
 				50B717082969726D00EEA972 /* SceneDelegate.swift in Sources */,
 			);
@@ -358,11 +362,12 @@
 				DEVELOPMENT_TEAM = 82F2BX73N3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Yotteko/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "現在位置を地図に表示するため使用";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -387,11 +392,12 @@
 				DEVELOPMENT_TEAM = 82F2BX73N3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Yotteko/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "現在位置を地図に表示するため使用";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

@@ -103,13 +103,14 @@ extension RouteCandidateViewController: UITableViewDelegate, UITableViewDataSour
         let tab = self.presentingViewController as! UITabBarController
         let vc = tab.selectedViewController as! MainViewController
         selectedPoint = searchCompleter.results[indexPath.row].title //選択されたセルのタイトルを取得
+        vc.searchIdentifier = self.searchIdentifier // 開始地点と到着地点　どちらを検索したかの識別子をMainViewに返す
         //返す先を選ぶ
         if searchIdentifier == "departure" { //出発地点
-            vc.departurePoint = self.selectedPoint //出発地点の情報　上書き
-            vc.request = MKLocalSearch.Request(completion: searchCompleter.results[indexPath.row])
+            vc.departurePointName = self.selectedPoint //出発地点の情報　上書き
+            vc.departureRequest = MKLocalSearch.Request(completion: searchCompleter.results[indexPath.row])
         } else if searchIdentifier == "arrival" {//到着地点
-            vc.arrivalPoint = self.selectedPoint //到着地点の情報　上書き
-            vc.request = MKLocalSearch.Request(completion: searchCompleter.results[indexPath.row])
+            vc.arrivalPointName = self.selectedPoint //到着地点の情報　上書き
+            vc.arrivalRequest = MKLocalSearch.Request(completion: searchCompleter.results[indexPath.row])
         } else { //例外処理
             print("Identification was not successed")
             return
