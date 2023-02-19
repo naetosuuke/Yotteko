@@ -35,12 +35,12 @@ class MainViewController: UIViewController, UISearchBarDelegate  {
     ]
     
     
-    var coordinatesArray = [ //座標の情報　MKLocalSearchの戻り値 Mapitemsからパースする必要あり？もしくはそのまま入れれる？
-        ["name":"初期地点",    "lat":35.68124,  "lon": 139.76672],
-        ["name":"寄り道地点1",   "lat":35.68026,  "lon": 139.75801],
-        ["name":"寄り道地点2",   "lat":35.6818,   "lon": 139.74326],
-        ["name":"到着地点",   "lat":35.69555,  "lon": 139.75074]
-    ]
+    //var coordinatesArray = [ //座標の情報　MKLocalSearchの戻り値 Mapitemsからパースする必要あり？もしくはそのまま入れれる？
+    //    ["name":"初期地点",    "lat":35.68124,  "lon": 139.76672],
+    //    ["name":"寄り道地点1",   "lat":35.68026,  "lon": 139.75801],
+    //    ["name":"寄り道地点2",   "lat":35.6818,   "lon": 139.74326],
+    //    ["name":"到着地点",   "lat":35.69555,  "lon": 139.75074]
+    //]
     
     
     
