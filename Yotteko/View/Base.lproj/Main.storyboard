@@ -9,23 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--GeneratedRoute-->
-        <scene sceneID="RY2-mc-F65">
-            <objects>
-                <viewController id="Ssm-W1-rgW" customClass="GeneratedRouteViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="2R6-tm-VlW">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="ptj-bq-m8R"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <tabBarItem key="tabBarItem" title="GeneratedRoute" image="list.bullet" catalog="system" id="1vk-kz-TVa"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="f6H-dR-Zsf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="295" y="-123"/>
-        </scene>
-        <!--MainView-->
+        <!--マップ-->
         <scene sceneID="kzY-Qn-bNu">
             <objects>
                 <viewController id="1uj-Xa-exk" customClass="MainViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
@@ -35,7 +19,7 @@
                         <viewLayoutGuide key="safeArea" id="W2h-P0-g48"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="MainView" image="globe.asia.australia.fill" catalog="system" id="Tt0-Cg-C9j"/>
+                    <tabBarItem key="tabBarItem" title="マップ" image="globe.asia.australia.fill" catalog="system" id="Tt0-Cg-C9j"/>
                     <connections>
                         <segue destination="sQi-9e-Hi3" kind="show" identifier="goRouteCandidate" id="hem-su-Csq"/>
                         <segue destination="YAe-rp-0oe" kind="show" identifier="goRouteResult" id="dr3-Pf-gAK"/>
@@ -75,46 +59,60 @@
                     </tabBar>
                     <connections>
                         <segue destination="1uj-Xa-exk" kind="relationship" relationship="viewControllers" id="gEP-Vd-MFD"/>
-                        <segue destination="Ssm-W1-rgW" kind="relationship" relationship="viewControllers" id="quQ-jO-z1d"/>
-                        <segue destination="FRU-MD-1sI" kind="relationship" relationship="viewControllers" id="GRB-f3-PXB"/>
-                        <segue destination="GTg-JB-u7P" kind="relationship" relationship="viewControllers" id="KsM-gf-FaE"/>
+                        <segue destination="oNE-Qx-Djp" kind="relationship" relationship="viewControllers" id="rlP-nE-SPI"/>
+                        <segue destination="kvD-7K-jlE" kind="relationship" relationship="viewControllers" id="FaZ-ry-5LU"/>
+                        <segue destination="n6J-gT-Pr2" kind="relationship" relationship="viewControllers" id="JHC-Sh-kHn"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VDg-ZK-KNz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-612" y="-122"/>
         </scene>
-        <!--OnlineRoute-->
-        <scene sceneID="Jrx-3r-4kd">
+        <!--Root View Controller-->
+        <scene sceneID="VCF-s5-UNZ">
             <objects>
-                <viewController id="FRU-MD-1sI" customClass="OnlineRouteViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Swa-Cz-H7D">
+                <tableViewController id="em9-fp-4oW" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="SKx-D8-MMa">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="dVz-ue-xXo"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <tabBarItem key="tabBarItem" title="OnlineRoute" image="network" catalog="system" id="5RC-5G-jNp"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="zOH-Tg-Cxb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="uPP-hc-E4i">
+                                <rect key="frame" x="0.0" y="50" width="393" height="43.666667938232422"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="uPP-hc-E4i" id="RrA-vS-5U0">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="43.666667938232422"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="em9-fp-4oW" id="Ucl-ZM-2N5"/>
+                            <outlet property="delegate" destination="em9-fp-4oW" id="qap-xi-xz6"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Root View Controller" id="Nue-mA-8eG"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1G0-bv-Ohk" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="294" y="555"/>
+            <point key="canvasLocation" x="1189" y="1265"/>
         </scene>
-        <!--Configure-->
-        <scene sceneID="ea8-eL-cqe">
+        <!--設定-->
+        <scene sceneID="q0Z-vg-Rms">
             <objects>
-                <viewController id="GTg-JB-u7P" customClass="ConfigureViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="zGv-bI-89m">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="5Mt-Bf-XaJ"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <tabBarItem key="tabBarItem" title="Configure" image="dial.medium" catalog="system" id="G0S-AR-yCp"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="eCh-FX-FSU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <navigationController id="n6J-gT-Pr2" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="設定" image="dial.medium" catalog="system" id="UlO-wg-A1Y"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="weq-fX-aZq">
+                        <rect key="frame" x="0.0" y="59" width="393" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="em9-fp-4oW" kind="relationship" relationship="rootViewController" id="yor-Cb-ED2"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Z5o-VR-qSG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="294" y="1299"/>
+            <point key="canvasLocation" x="294" y="1265"/>
         </scene>
         <!--Help View Controller-->
         <scene sceneID="X0U-RH-kbH">
@@ -147,6 +145,76 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dXY-r5-Tm4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1189" y="-1499"/>
+        </scene>
+        <!--経路履歴-->
+        <scene sceneID="5Om-Nm-QQK">
+            <objects>
+                <viewController id="oNE-Qx-Djp" customClass="GeneratedRouteViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="K39-4w-APN">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="Etz-1W-9KP"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="経路履歴" image="list.bullet" catalog="system" id="Ant-K1-qfR"/>
+                    <connections>
+                        <segue destination="DxP-bc-BUh" kind="show" identifier="goRouteResult" id="pcS-Ty-U1u"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Vz3-hr-OMT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="294" y="-123"/>
+        </scene>
+        <!--Route Result View Controller-->
+        <scene sceneID="Gy7-WP-1sj">
+            <objects>
+                <viewController id="DxP-bc-BUh" customClass="RouteResultViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="BIu-i0-GZc">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="qYf-CW-bzC"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="RhN-or-zVj"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5B8-8X-bj1" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1189" y="-123"/>
+        </scene>
+        <!--Route Result View Controller-->
+        <scene sceneID="uaE-CH-Jo3">
+            <objects>
+                <viewController id="xpz-s3-1AD" customClass="RouteResultViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="PxD-Ta-a0P">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="XQ8-x2-kbW"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="GjC-w0-F5A"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ry0-Lg-3y5" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1189" y="570"/>
+        </scene>
+        <!--みんなの履歴-->
+        <scene sceneID="u69-G5-3qN">
+            <objects>
+                <viewController id="kvD-7K-jlE" customClass="OnlineRouteViewController" customModule="Yotteko" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="UCd-AS-2hJ">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="83J-Kt-H5K"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="みんなの履歴" image="network" catalog="system" id="mWW-qT-wp1"/>
+                    <connections>
+                        <segue destination="xpz-s3-1AD" kind="show" identifier="goRouteResult" id="b4d-bC-kWo"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="I4v-bd-r8e" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="294" y="570"/>
         </scene>
     </scenes>
     <resources>

@@ -17,15 +17,14 @@ class TabBarViewController: UITabBarController {
         super.viewDidLoad()
         
         view.backgroundColor = UIColor.white
-        
         let mainVC = MainViewController()
-        mainVC.tabBarItem = UITabBarItem(title: "Map", image: UIImage(systemName: "globe.asia.australia.fill"), tag:0)
+        mainVC.tabBarItem = UITabBarItem(title: "マップ", image: UIImage(systemName: "globe.asia.australia.fill"), tag:0)
         let generatedRouteVC = GeneratedRouteViewController()
-        generatedRouteVC.tabBarItem = UITabBarItem(title: "History", image: UIImage(systemName: "list.bullet"), tag:1)
+        generatedRouteVC.tabBarItem = UITabBarItem(title: "検索履歴", image: UIImage(systemName: "list.bullet"), tag:1)
         let onlineRouteVC = OnlineRouteViewController()
-        onlineRouteVC.tabBarItem = UITabBarItem(title: "Online", image: UIImage(systemName: "network"), tag:2)
+        onlineRouteVC.tabBarItem = UITabBarItem(title: "みんなの履歴", image: UIImage(systemName: "network"), tag:2)
         let configureVC = ConfigureViewController()
-        configureVC.tabBarItem = UITabBarItem(title: "Configure", image: UIImage(systemName: "dial.low"), tag:3)
+        configureVC.tabBarItem = UITabBarItem(title: "設定", image: UIImage(systemName: "dial.low"), tag:3)
     
         self.viewControllers = [mainVC, generatedRouteVC, onlineRouteVC, configureVC]
         

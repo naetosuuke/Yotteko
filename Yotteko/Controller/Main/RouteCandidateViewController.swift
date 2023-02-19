@@ -11,7 +11,6 @@ import MapKit
 
 class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
 
-    let colors = Colors()
     var searchBar = UISearchBar()
     var tableView = UITableView()
     var searchCompleter = MKLocalSearchCompleter()
@@ -19,7 +18,6 @@ class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
     var searchIdentifier = "" // MainView　検索ボタンのSegue元を識別する
     var locatePoint = ""
     var request = MKLocalSearch.Request()
-    var selectedPoint = ""
     
     
     override func viewDidLoad() {
@@ -27,10 +25,10 @@ class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
         print(searchIdentifier) //　MainViewController どちらからきたかで軽油を変えている
         if searchIdentifier == "departure" {
             locatePoint = " 出発地点のキーワードを入力してください"
-            view.backgroundColor = colors.blueGreen
+            view.backgroundColor = Colors.blueGreen
         } else if searchIdentifier == "arrival" {
             locatePoint = " 到着地点のキーワードを入力してください"
-            view.backgroundColor = colors.bluePurple
+            view.backgroundColor = Colors.bluePurple
         } else {
             print("Identification was not successed")
             return
@@ -39,7 +37,7 @@ class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
         searchBar.frame = .init(x: 0, y: 20, width: view.frame.size.width, height: 60)
         searchBar.delegate = self
         searchBar.placeholder = locatePoint
-        searchBar.tintColor = colors.blue
+        searchBar.tintColor = Colors.blue
         searchBar.backgroundColor = .white
         //searchBar.layer.cornerRadius = 10
         //searchBar.layer.borderWidth = 3
@@ -50,7 +48,7 @@ class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
         tableView.frame = .init(x: 0, y: 80, width: view.frame.size.width, height: 999)
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.layer.borderColor = colors.blue.cgColor
+        tableView.layer.borderColor = Colors.blue.cgColor
         tableView.rowHeight = 60
         tableView.separatorColor = UIColor.black
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: "cell")
@@ -102,14 +100,14 @@ extension RouteCandidateViewController: UITableViewDelegate, UITableViewDataSour
         //下記　前のビューからMainViewインスタンスを取得(モーダル⇨タブバー⇨メインと入れ子上に取得してる)
         let tab = self.presentingViewController as! UITabBarController
         let vc = tab.selectedViewController as! MainViewController
-        selectedPoint = searchCompleter.results[indexPath.row].title //選択されたセルのタイトルを取得
-        vc.searchIdentifier = self.searchIdentifier // 開始地点と到着地点　どちらを検索したかの識別子をMainViewに返す
+        let selectedPoint = searchCompleter.results[indexPath.row].title //選択されたセルのタイトルを取得
+        vc.searchIdentifier = searchIdentifier // 開始地点と到着地点　どちらを検索したかの識別子をMainViewに返す
         //返す先を選ぶ
         if searchIdentifier == "departure" { //出発地点
-            vc.departurePointName = self.selectedPoint //出発地点の情報　上書き
+            vc.departurePointName = selectedPoint //出発地点の情報　上書き
             vc.departureRequest = MKLocalSearch.Request(completion: searchCompleter.results[indexPath.row])
         } else if searchIdentifier == "arrival" {//到着地点
-            vc.arrivalPointName = self.selectedPoint //到着地点の情報　上書き
+            vc.arrivalPointName = selectedPoint //到着地点の情報　上書き
             vc.arrivalRequest = MKLocalSearch.Request(completion: searchCompleter.results[indexPath.row])
         } else { //例外処理
             print("Identification was not successed")

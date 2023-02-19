@@ -7,26 +7,36 @@
 // 検索結果の一覧表示 参照元 -> https://dev.classmethod.jp/articles/location-suggest-use-mapkit/
 // TableViewからMapに検索結果を渡す方法　-> https://qiita.com/hanawat/items/1f3f3c277a8f2c4b07d2
 // 経路の表示 参照元 -> https://orangelog.site/swift/mapkit-waypoints-route-direction/
+// 現在地の表示　参照元 -> https://qiita.com/yuta-sasaki/items/3151b3faf2303fe78312
 //
+//@objc StoryBoardがらみのDelegateメソッドにつける
+//クロージャ内でグローバル変数をよぶとき
+//selfをつけるとグローバル変数が上書きされる
+//selfをつけないと、クロージャ内での変更は破棄される
 
 
 import UIKit
 import MapKit
+import CoreLocation
 
-class MainViewController: UIViewController, UISearchBarDelegate  {
-    let colors = Colors()
-    // var coordinateArray = [CoordinatesArray]()
-    let mapView = MKMapView()
-    var searchIdentifier = ""
+
+class MainViewController: UIViewController, UISearchBarDelegate {
     
+    //MARK: - property
+    
+    let locationManager = CLLocationManager()
+    var userLocation = CLLocationCoordinate2D()
+    var mapView = MKMapView()
+    
+    var searchIdentifier = "blank"
     var departurePointName = "現在地"
-    var departureRequest = MKLocalSearch.Request()
-    var departureMapItem = MKMapItem()
-
+    var departureRequest: MKLocalSearch.Request?
+    var departureMapItem: MKMapItem?
     var arrivalPointName = "到着地点"
-    var arrivalRequest = MKLocalSearch.Request()
-    var arrivalMapItem = MKMapItem()
+    var arrivalRequest: MKLocalSearch.Request?
+    var arrivalMapItem: MKMapItem?
 
+    var latestPinnedPoint:MKPointAnnotation? //最後におされたピンのCoordinateを記録、
 
     let attributes: [NSAttributedString.Key : Any] = [
         .font : UIFont.systemFont(ofSize: 12.0, weight: .heavy), // 文字色
@@ -34,37 +44,56 @@ class MainViewController: UIViewController, UISearchBarDelegate  {
         .strokeColor : UIColor.gray, // 縁取りの色
     ]
     
-    
-    //var coordinatesArray = [ //座標の情報　MKLocalSearchの戻り値 Mapitemsからパースする必要あり？もしくはそのまま入れれる？
-    //    ["name":"初期地点",    "lat":35.68124,  "lon": 139.76672],
-    //    ["name":"寄り道地点1",   "lat":35.68026,  "lon": 139.75801],
-    //    ["name":"寄り道地点2",   "lat":35.6818,   "lon": 139.74326],
-    //    ["name":"到着地点",   "lat":35.69555,  "lon": 139.75074]
-    //]
-    
-    
-    
-    
+    var didStartUpdatingLocation = false //初期値　false
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // 位置情報取得の許可状況を確認
+        initLocation()
+        //UI周りを表示
+        generateView()
+        generateMapView()
+                
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        generateCurrentLocationAnnotation()
+        generateAnnotation()
+        generateRoute()
+    }
+    
+    private func initLocation() { //invoke 呼び出す:  メインスレッドが動いている時、UIが動かなくなる原因になるかも
+        switch CLLocationManager.authorizationStatus() { //現在地取得　許可ステータス　判別
+        case .notDetermined: //未許可の場合
+            //ユーザーが位置情報の許可をまだしていないので、位置情報許可のダイアログを表示する
+            locationManager.requestWhenInUseAuthorization() //quickhelp参照、位置情報の取得前に必ずこれを呼び出さないといけない
+        case .restricted, .denied: //断られている場合
+            showPermissionAlert() //許可をとるfunc実行
+        case .authorizedAlways, .authorizedWhenInUse: //許可済みの場合
+            if !didStartUpdatingLocation{ //初期値 falseだったら(一回もアップデートしていなければ)
+                didStartUpdatingLocation = true //アップデート済み　へと変換
+                locationManager.startUpdatingLocation() //ロケーションの取得を開始
+                locationManager.delegate = self
+                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+                locationManager.distanceFilter = kCLDistanceFilterNone //どれだけ動いたら反応するか
+                guard let userLocation: CLLocationCoordinate2D = locationManager.location?.coordinate else { return }
+                print("initLocation()で取得したlocations (CLLocationCoordinate2D)= \(userLocation.latitude) \(userLocation.longitude)")
+                self.userLocation = userLocation
+            }
+        @unknown default:
+            break
+        }
+    }
+    
+    //MARK: - configure view
+    
+    private func generateView() {
         //出発地点表示ビュー
         let departureView = UIView()
         departureView.frame = CGRect(x: 0, y: 60, width: view.frame.size.width, height: 60)
-        departureView.backgroundColor = colors.blueGreen
+        departureView.backgroundColor = Colors.blueGreen
         view.addSubview(departureView)
-        
-        //現在地点 表示ボタン
-        let currentLocationButton = UIButton(type: .system)
-        currentLocationButton.frame = CGRect(x: 20, y: 70, width: 40, height: 40)
-        currentLocationButton.backgroundColor = .white
-        currentLocationButton.layer.cornerRadius = 10
-        currentLocationButton.setImage(UIImage(systemName: "mappin.and.ellipse"), for: .normal)
-        currentLocationButton.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
-        view.addSubview(currentLocationButton)
-        //currentLocationButton.addTarget(self, action: #selector(****), for: .touchDown)
-        
         //出発地点 検索ボタン
         let departureSearchButton = UIButton(type: .system)
         departureSearchButton.frame = CGRect(x: 80, y: 70, width: view.frame.size.width - 100, height: 40)
@@ -80,19 +109,8 @@ class MainViewController: UIViewController, UISearchBarDelegate  {
         //到着地点表示ビュー
         let arrivalView = UIView()
         arrivalView.frame = CGRect(x: 0, y: 120, width: view.frame.size.width, height: 60)
-        arrivalView.backgroundColor = colors.bluePurple
+        arrivalView.backgroundColor = Colors.bluePurple
         view.addSubview(arrivalView)
-        
-        //到着地点 ランダム表示ボタン
-        let randomLocationButton = UIButton(type: .system)
-        randomLocationButton.frame = CGRect(x: 20, y: 130, width: 40, height: 40)
-        randomLocationButton.backgroundColor = .white
-        randomLocationButton.layer.cornerRadius = 10
-        randomLocationButton.setImage(UIImage(systemName: "dice"), for: .normal)
-        randomLocationButton.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
-        view.addSubview(randomLocationButton)
-        //currentLocationButton.addTarget(self, action: #selector(****), for: .touchDown)
-        
         //到着地点 検索ボタン
         let arrivalSearchButton = UIButton(type: .system)
         arrivalSearchButton.frame = CGRect(x: 80, y: 130, width: view.frame.size.width - 100, height: 40)
@@ -105,111 +123,196 @@ class MainViewController: UIViewController, UISearchBarDelegate  {
         view.addSubview(arrivalSearchButton)
         arrivalSearchButton.addTarget(self, action: #selector(goArrivalRouteCandidate), for: .touchDown) //selectorでクロージャ外の関数を呼ぶ時は、シャープ？
         
-        //MapView
+        //現在地点 currentlocation 表示ボタン
+        let currentLocationButton = UIButton(type: .system)
+        currentLocationButton.frame = CGRect(x: 20, y: 70, width: 40, height: 40)
+        currentLocationButton.backgroundColor = .white
+        currentLocationButton.layer.cornerRadius = 10
+        currentLocationButton.setImage(UIImage(systemName: "mappin.and.ellipse"), for: .normal)
+        currentLocationButton.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
+        view.addSubview(currentLocationButton)
+        //currentLocationButton.addTarget(self, action: #selector(****), for: .touchDown)
+        //到着地点  randomlocation ランダム表示ボタン
+        let randomLocationButton = UIButton(type: .system)
+        randomLocationButton.frame = CGRect(x: 20, y: 130, width: 40, height: 40)
+        randomLocationButton.backgroundColor = .white
+        randomLocationButton.layer.cornerRadius = 10
+        randomLocationButton.setImage(UIImage(systemName: "dice"), for: .normal)
+        randomLocationButton.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
+        view.addSubview(randomLocationButton)
+        //currentLocationButton.addTarget(self, action: #selector(****), for: .touchDown)
+        //Helpボタン(初回起動時に出る操作方法を、もう一度出す)
+        let helpButton = UIButton(type: .system)
+        helpButton.frame = CGRect(x: view.frame.size.width - 85, y: view.frame.size.height - 185, width: 100, height: 100)
+        helpButton.setImage(UIImage(systemName: "questionmark.circle"), for: .normal)
+        helpButton.tintColor =  .white
+        view.addSubview(helpButton)
+        helpButton.addTarget(self, action: #selector(goHelp), for: .touchDown) //selectorでクロージャ外の関数を呼ぶ時は、シャープ？
+    }
+        
+    private func generateMapView() { //地図を描写するメソッド
         mapView.frame = CGRect(x: 0, y: 180, width: view.frame.size.width, height: view.frame.size.height - 180)
-        mapView.delegate = self //mapview delegate
+        mapView.delegate = self
+        mapView.showsUserLocation = true
+        mapView.mapType = .standard
+        //mapView.userTrackingMode = .follow
+        
+        // Region is the coordinate and span of the map.
+        // Region may be modified to fit the aspect ratio of the view using regionThatFits:.
+        let region = MKCoordinateRegion(center: userLocation, latitudinalMeters: 0.5, longitudinalMeters: 0.5)//縮尺を設定
+        mapView.setRegion(region, animated:true)
         view.addSubview(mapView)
         
+    }
+
+    //MARK: - configure currentlocation
+    
+    private func generateCurrentLocationAnnotation(){
+        print("逆ジオコーダーの引数 CLLocation取得前 userLocation \(self.userLocation)")
+        let currentLocation = CLLocation(latitude: self.userLocation.latitude, longitude: self.userLocation.longitude)
+        //↓この処理　検索結果(戻り値 -> MKMapItem)がでるより先に処理が飛ばされている
+        print("リバースジオコーダー検索開始")
+        CLGeocoder().reverseGeocodeLocation(currentLocation, completionHandler: {(placemarks, error) in
+            if error == nil {
+                //CLLocationで取得している現在地を、Geocoderで検索(最終的に、ルート作成用のMKMapを作りたい)
+                print("リバースジオコーダー検索結果")
+                
+                
+                guard var departureMapItem = self.departureMapItem else {return}
+                self.searchIdentifier = "departure_currentlocation"  //初期値書き換え
+                self.mapView.removeAnnotations(self.mapView.annotations)
+                let currentPlacemark:CLPlacemark = (placemarks?[0])! //CLPlacemark型
+                print("CKPlacemark 情報 \(currentPlacemark)")
+                //検索結果　placemark(CLPlacemark型)を MKPlacemarkにキャスト
+                let placemark = MKPlacemark(placemark: currentPlacemark) //CLPlacemarkをMKPlacemarkにコンバートする
+                print("MKPlacemark(コンバート後)　情報 \(placemark)")
+                departureMapItem = MKMapItem(placemark: placemark)
+                print("MKMapItem(コンバート後)　座標情報 \(departureMapItem.placemark.coordinate)")
+                departureMapItem.name = "現在地"
+                let departurePoint = MKPointAnnotation()
+                departurePoint.coordinate = departureMapItem.placemark.coordinate
+                departurePoint.title = departureMapItem.name
+                self.latestPinnedPoint = departurePoint
+                self.mapView.addAnnotation(departurePoint)
+                self.mapView.showAnnotations(self.mapView.annotations, animated: true) //アノテーションをMapにのせる
+                print("現在地アノテーション設置　完了")
+            }
+        })
+    }
+    
+
+    
+    
+    private func generateAnnotation() {
         
-        print(searchIdentifier)
+        print(searchIdentifier) //検索結果の座標情報が出発地、到着地のどちらかを確認する
+        
+        
         
         //出発地点検索結果を表示する
         if searchIdentifier == "departure" { //目的地点検索検索結果
+            print("departureRequestの中身確認")
+            print(departureRequest)
+            guard let departureRequest = self.departureRequest else { return }
             let departureSearch = MKLocalSearch(request: departureRequest)
-            departureSearch.start { response, error in
-                //エラーハンドリング　表示必要
-                response?.mapItems.forEach { item in //mapItems　responseがもってる
-                    self.departureMapItem = item //MKMapItem型データを代入
-                    //元のコード response内のMKMapItemからplacemark.coordinatem/titleプロパティ を取得してアノテーションを生成
-                    let departurePoint = MKPointAnnotation()
-                    departurePoint.coordinate = item.placemark.coordinate
-                    departurePoint.title = item.placemark.title
-                    self.mapView.addAnnotation(departurePoint)
-                    //
-                }
-            }
-
+            print("request入手前　検索前に保存されているアノテーション\(self.mapView.annotations)")
+            self.mapView.removeAnnotations(self.mapView.annotations)
+            print("request入手後　アノテーションの削除済んんでいる？\(self.mapView.annotations)")
             
+            /*
+             MKLocalSearch　非同期処理なので、処理が終わるまでawaitさせる
+             
+            */
             
+            print("MKLocalsearch 引数departure 検索開始")
+            departureSearch.start(completionHandler: { (response, error) in
+                    //エラーハンドリング　表示必要
+                    response?.mapItems.forEach { item in //mapItems　responseがもってる
+                        //検索結果のDeparturePointを表示
+                        print("MKLocalsearch 引数departure 検索完了")
+                        print(item)
+                        self.departureMapItem = item //MKMapItem型データを代入
+                        let departurePoint = MKPointAnnotation()
+                        departurePoint.coordinate = item.placemark.coordinate
+                        departurePoint.title = item.name
+                        self.latestPinnedPoint = departurePoint
+                        self.mapView.addAnnotation(departurePoint)
+                        //最後に取得したArrivalPointを表示
+                        let arrivalPoint = MKPointAnnotation()
+                        guard let arrivalMapItem = self.arrivalMapItem else {return}
+                        arrivalPoint.coordinate = arrivalMapItem.placemark.coordinate
+                        arrivalPoint.title = arrivalMapItem.placemark.title
+                        self.mapView.addAnnotation(arrivalPoint)
+                        print("出発地アノテーション設置　完了")
+                        
+                    }
+                })
         } else if searchIdentifier == "arrival" { //到着地点検索結果　アノテーションを表示する
+            print("arrivalRequestの中身確認")
+            guard let arrivalRequest = self.arrivalRequest else {return}
+            print(arrivalRequest)
             let arrivalSearch = MKLocalSearch(request: arrivalRequest)
-            arrivalSearch.start { response, error in
+            
+            print("request入手前　検索前に保存されているアノテーション\(self.mapView.annotations)")
+            self.mapView.removeAnnotations(self.mapView.annotations)
+            print("request入手後　アノテーションの削除済んんでいる？\(self.mapView.annotations)")
+            
+            /*
+             MKLocalSearch　非同期処理なので、処理が終わるまでawaitさせる
+             */
+            
+            print("MKLocalsearch 引数arrival 検索開始")
+            arrivalSearch.start(completionHandler: { (response, error) in
                 //エラーハンドリング　表示必要
                 response?.mapItems.forEach { item in //mapItems　responseがもってる
+                    print("MKLocalsearch 引数arrival 検索完了")
+                    print(item)
+                    //検索結果のDeparturePointを表示
+                    self.mapView.removeAnnotations(self.mapView.annotations)
                     self.arrivalMapItem = item //MKMapItem型データを代入
-                    //元のコード response内のMKMapItemからplacemark.coordinatem/titleプロパティ を取得してアノテーションで表示
                     let arrivalPoint = MKPointAnnotation()
                     arrivalPoint.coordinate = item.placemark.coordinate
-                    arrivalPoint.title = item.placemark.title
+                    arrivalPoint.title = item.name
+                    self.latestPinnedPoint = arrivalPoint
                     self.mapView.addAnnotation(arrivalPoint)
+                    //最後に取得したArrivalPointを表示
+                    let departurePoint = MKPointAnnotation()
+                    guard let departureMapItem = self.departureMapItem else {return}
+                    departurePoint.coordinate = departureMapItem.placemark.coordinate
+                    departurePoint.title = departureMapItem.placemark.title
+                    self.mapView.addAnnotation(departurePoint)
+                    print("目的地アノテーション設置　完了")
                 }
-            }
-            self.mapView.showAnnotations(self.mapView.annotations, animated: true) //アノテーションをMapにのせる
-            
+            })
         } else { // searchIdentifierがない場合(画面が遷移されていない場合)
-            print("searchIdentifier doesn`t have a value yet")
+            print("searchIdentifierに値が設定されていないため、出発地(検索結果)、目的地アノテーション設置は行われませんでした。")
         }
-        
-        
-        // マップ情報 初期化
-        let coordinate = CLLocationCoordinate2DMake(coordinatesArray[0]["lat"] as! CLLocationDegrees, coordinatesArray[0]["lon"] as! CLLocationDegrees) //CLLocationDegrees　型のx,y座標を入力し、構造体CLLocationCoordinate2Dを作成
-        let span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05) //X,Y軸の表示範囲を持つ構造体 値1あたり約111km
-        let region = MKCoordinateRegion(center: coordinate, span: span) //マップの表示域を設定(座標、表示範囲を渡す)
-        self.mapView.setRegion(region, animated: true) //表示範囲をマップに設定
-        
-        
-        //座標情報の型変換 (coordinatesArray -> annotationCoordinate -> [routeCoordinates] -> item) = CLLocationCoordinate2D
-        //              placemark = MKPlacemark(coordinate: item)
-        //              placemarks = [MKMapItem(placemark: placemark)]
-        //              経路作成のfor処理 placemarks = MKMapItemを引数
-        //              つまり、MKMapItemの配列を作成すれば、経路作成は可能
-        //              また、配列の順番は[開始地点, 寄り道1, 寄り道2, ...寄り道.count, 終了地点と設定るす。]
-        //
-        /*経由地点のアノテーション表示＋前経由地点の座標情報を配列に追加　引用元コード
-        var routeCoordinates: [CLLocationCoordinate2D] = [] //ルートを構成する地点情報(CLLocationCOordinate2D)を入れる配列を初期化
-        for i in 0..<coordinatesArray.count { //経由地の数だけ繰り返す
-            let annotation = MKPointAnnotation() //アノテーションのインスタンス生成
-            let annotationCoordinate = CLLocationCoordinate2DMake(coordinatesArray[i]["lat"] as! CLLocationDegrees, coordinatesArray[i]["lon"] as! CLLocationDegrees) //アノテーションの座標情報を代入
-            annotation.title = coordinatesArray[i]["name"] as? String //ピンの吹き出しに名前が出るように
-            annotation.coordinate = annotationCoordinate //アノテーション coordinateプロパティに座標情報を渡す
-            routeCoordinates.append(annotationCoordinate) //ルート作成に使用するrouteCoodinates配列にアノテーション座標情報を追加
-            self.mapView.addAnnotation(annotation) //アノテーションをviewに表示
-        }
-        print("取得した座標の配列を表示します。\(routeCoordinates)")
-        */
-        
+            self.mapView.showAnnotations(self.mapView.annotations, animated: true) //アノテーションをMapにのせる
+    }
     
-        /* 経路作成に使う情報を投入　　引用元コード
-        var myRoute: MKRoute! //MKPolyLineでなくMKRouteを使用
-        let directionsRequest = MKDirections.Request() //MKDirectionsの検索値として渡すMKDirections.Recuestのインスタンス生成
-        var placemarks = [MKMapItem]() //構造体 MKMapItemを配列としてインスタンス化
-        //routeCoordinatesの配列からMKMapItemの配列に変換
-        for item in routeCoordinates {
-            //↓ routeCoordinate配列のデータが持つcoordinateプロパティをコンバート
-            //  **ここでrouteCoordinateをitemとして代入、なのでplacemarkはitemというプロパティを持つことになる（初期化される）
-            let placemark = MKPlacemark(coordinate: item, addressDictionary: nil)
-            placemarks.append(MKMapItem(placemark: placemark)) //コンバートして代入したplacemarkをMKMapItemに入れ、初期化したものを配列として追加（分けて書けや！）
-        }
-        */
+    
+    private func generateRoute() {
+        
+        print("route作成前にdepartureMapItemもっているか")
+        print(departureMapItem?.name)
+        print("route作成前にarrivalMapItemもっているか")
+        print(arrivalMapItem?.name)
         
         
-        
-        
-        
-        
-        // ~~~~~~~~一旦取り消し、実装予定の処理(経路用のMKMapItem配列の作成＋Annotationと経路作成)~~~~~~~~~~
-        if self.departureMapItem != nil, self.arrivalMapItem != nil {
+        //現在地と到着地点の両方が選択されている場合
+        if departureMapItem?.name != "Unknown Location" && arrivalMapItem?.name != "Unknown Location" {
+            mapView.removeAnnotations(self.mapView.annotations) //　検索結果のロジックから出てくるアノテーションを初期化
+            print("generateRoute annotationsが削除できているか確認")
+            print(self.mapView.annotations)
             var placemarks = [MKMapItem]() //MKDirections.Requestインスタンスに渡すMKMapItemの配列を作成
+            guard let departureMapItem = self.departureMapItem else {return}
+            guard let arrivalMapItem = self.arrivalMapItem else {return}
             placemarks.append(departureMapItem)
-            
-            // ~~ここに寄り道の検索結果　MapItemを取得
-            
             placemarks.append(arrivalMapItem)
-            
-            
+            print("placemarksの中身確認")
+            print(placemarks)
             var myRoute: MKRoute! //MKPolyLineでなくMKRouteを使用
             let directionsRequest = MKDirections.Request() //MKDirectionsの検索値として渡すMKDirections.Recuestのインスタンス生成
-            directionsRequest.transportType = .walking //移動手段は徒歩
             directionsRequest.transportType = .walking //移動手段は徒歩
             for (k, item) in placemarks.enumerated(){ //k 0からのインクリメント, とitem配列(中身 routeCoordinates)を繰り返し
                 if k < (placemarks.count - 1){ //繰り返し回数がplacemarkの数未満なら(まだ呼び出してない配列データがあれば)
@@ -225,43 +328,9 @@ class MainViewController: UIViewController, UISearchBarDelegate  {
                 }
             }
         } else {
+            print("Route作成用メソッド　起動しませんでした")
             return
         }
-        //~~~~~~~~一旦取り消し、実装予定の処理(経路用のMKMapItem配列の作成＋Annotationと経路作成)~~~~~~~~~~
-        
-        
-        
-        
-        
-        
-        
-        /*　全ての経由地を通る経路の表示（人が通る直線ver）　引用元コード
-        directionsRequest.transportType = .walking //移動手段は徒歩
-        for (k, item) in placemarks.enumerated(){ //k 0からのインクリメント, とitem配列(中身 routeCoordinates)を繰り返し
-            if k < (placemarks.count - 1){ //繰り返し回数がplacemarkの数未満なら(まだ呼び出してない配列データがあれば)
-                directionsRequest.source = item //検索値 sourceプロパティにスタート地点情報を渡す routeCoordinate[k]
-                directionsRequest.destination = placemarks[k + 1] //目標地点(配列1つ先の座標情報) MKPlacemark(coordinate: item)[k+1]
-                let direction = MKDirections(request: directionsRequest) //MKDirectionsクラスを初期化
-                direction.calculate(completionHandler: {(response, error) in //calculateメソッドを開始
-                    if error == nil { //エラーが出なければ
-                        myRoute = response?.routes[0] //respoce?routes[0] を代入
-                        self.mapView.addOverlay(myRoute.polyline, level: .aboveRoads) //mapViewに描写
-                    }
-                })
-            }
-        }
-        */
-        
-        //Helpボタン(初回起動時に出る操作方法を、もう一度出す)
-        let helpButton = UIButton(type: .system)
-        helpButton.frame = CGRect(x: view.frame.size.width - 85, y: view.frame.size.height - 185, width: 100, height: 100)
-        helpButton.setImage(UIImage(systemName: "questionmark.circle"), for: .normal)
-        helpButton.tintColor =  .white
-        view.addSubview(helpButton)
-        helpButton.addTarget(self, action: #selector(goHelp), for: .touchDown) //selectorでクロージャ外の関数を呼ぶ時は、シャープ？
-        
-        var searchIdentifier = "searchIdentifier:blank(initialized while viewDidLoad)"
-        print(searchIdentifier)
     }
     
     
@@ -278,7 +347,6 @@ class MainViewController: UIViewController, UISearchBarDelegate  {
         performSegue(withIdentifier: "goRouteResult", sender: nil)
     }
     
-    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) { //検索ボタンの識別コード(sender)を渡している どっちのボタンかで検索結果を返す先を分岐させる
         // ②Segueの識別子確認
         if segue.identifier == "goRouteCandidate" {
@@ -288,15 +356,74 @@ class MainViewController: UIViewController, UISearchBarDelegate  {
             nextView.searchIdentifier = sender as! String
         }
     }
+    
+    
+   
+    
+    
 }
 
 
+// MARK: - CLLocationManagerDelegate
+extension MainViewController: CLLocationManagerDelegate { //位置情報を取得(更新を検知)した際に起動するdelegateメソッド
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("位置の更新を取得")
+        guard let userLocation: CLLocationCoordinate2D = manager.location?.coordinate else { return }
+        //print("locations = \(userLocation.latitude) \(userLocation.longitude)")
+        self.userLocation = userLocation
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        let alert = UIAlertController(title: nil, message: "位置情報の取得に失敗しました", preferredStyle: .alert)
+        alert.addAction(UIAlertAction.init(title: "OK", style: .default, handler: { (_) in
+            self.dismiss(animated: true, completion: nil)
+        }))
+        present(alert, animated: true, completion: nil)
+    }
+    
+//MARK: Utility
+    private func showPermissionAlert(){ //位置情報の取得
+        //位置情報が制限されている/拒否されている
+        let alert = UIAlertController(title: "位置情報の取得", message: "設定アプリから位置情報の使用を許可して下さい。", //アラートコントローラ初期化
+                                      preferredStyle: .alert)
+        let goToSetting = UIAlertAction(title: "設定アプリを開く", style: .default) { _ in //アラートのアクションを初期化
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else { //設定画面に遷移するURLを代入
+                return
+            }
+
+            if UIApplication.shared.canOpenURL(settingsUrl) { // URLを開けることができれば
+                UIApplication.shared.open(settingsUrl, completionHandler: nil) //移動する
+            }
+        }
+        let cancelAction = UIAlertAction(title: NSLocalizedString("キャンセル", comment: ""), style: .cancel) { (_) in //通知のキャンセルアクション
+            self.dismiss(animated: true, completion: nil) //モーダルを下げる
+        }
+        alert.addAction(goToSetting) //設定画面にいくアクションを追加
+        alert.addAction(cancelAction) //キャンセルするアクションを追加
+        
+        self.present(alert, animated: true, completion: nil)//アラート画面を表示
+    }
+    
+}
+
+
+//MARK:MKMapViewDelegate
+
 extension MainViewController:MKMapViewDelegate {
+        
+    //ピンが押された時のDeleagteメソッド
+    func mapView(_ mapView: MKMapView, didAdd views: [MKAnnotationView]) {
+        print("latestPinnedPoint 座標")
+        guard let latestPinnedPoint = self.latestPinnedPoint else {return}
+        print(latestPinnedPoint.coordinate)
+        var region:MKCoordinateRegion = MKCoordinateRegion(center:latestPinnedPoint.coordinate, latitudinalMeters: 0.05, longitudinalMeters: 0.05)//縮尺を設定
+        mapView.setRegion(region,animated:false)
+        view.addSubview(mapView)
+    }
+    
     //アノテーションのパラメーターを設定するDelegateメソッド？
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        if annotation is MKUserLocation { //現在地の場合はnil?
-            return nil
-        }
         let reuseId = "pin"
         var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId)
         if pinView == nil {
