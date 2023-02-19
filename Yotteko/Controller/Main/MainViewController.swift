@@ -128,7 +128,7 @@ class MainViewController: UIViewController, UISearchBarDelegate  {
                     //
                 }
             }
-            self.mapView.showAnnotations(self.mapView.annotations, animated: true) //アノテーションをMapにのせる
+
             
             
         } else if searchIdentifier == "arrival" { //到着地点検索結果　アノテーションを表示する
