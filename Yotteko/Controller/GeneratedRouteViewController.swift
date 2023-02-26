@@ -76,6 +76,8 @@ extension GeneratedRouteViewController: UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("\(indexPath.row)番セルが押されたよ！")
         goRouteResult()
+        
+        
         //departureSearchButton.addTarget(self, action: #selector(goDepartureRouteCandidate), for: .touchDown)
         //下記　前のビューからMainViewインスタンスを取得(モーダル⇨タブバー⇨メインと入れ子上に取得してる)
         //let tab = self.presentingViewController as! UITabBarController

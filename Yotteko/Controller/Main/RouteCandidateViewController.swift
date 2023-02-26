@@ -9,8 +9,13 @@
 import UIKit
 import MapKit
 
+protocol RouteCandidateViewControllerDelegate {
+    func handleSearch(pointName: String)
+}
+
 class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
 
+    // MARK: - property
     var searchBar = UISearchBar()
     var tableView = UITableView()
     var searchCompleter = MKLocalSearchCompleter()
@@ -18,7 +23,10 @@ class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
     var searchIdentifier = "" // MainView　検索ボタンのSegue元を識別する
     var locatePoint = ""
     var request = MKLocalSearch.Request()
+    var delegate: RouteCandidateViewControllerDelegate?
     
+    
+    //MARK: init
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,9 +47,6 @@ class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
         searchBar.placeholder = locatePoint
         searchBar.tintColor = Colors.blue
         searchBar.backgroundColor = .white
-        //searchBar.layer.cornerRadius = 10
-        //searchBar.layer.borderWidth = 3
-        //searchBar.layer.borderColor = colors.blueGreen.cgColor
         view.addSubview(searchBar)
 
         
@@ -59,36 +64,29 @@ class RouteCandidateViewController: UIViewController, UISearchBarDelegate  {
         
     }
     
+    //MARK: - func
+    
     //検索ボタンを押した時に反応するDelegateメソッド、queryFragmentで検索している
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         view.endEditing(true)
         if let searchWord = searchBar.text{
             print(searchWord)
-            //searchCompleter.region = mapView.region // 検索結果の範囲　リージョンで指名
             searchCompleter.queryFragment = searchBar.text!
-
         }
     }
 }
 
 
-//:MARK 検索結果を並べるテーブルビューのためのプロトコル準拠
+//MARK: - tableviewdelegate, datasource
 extension RouteCandidateViewController: UITableViewDelegate, UITableViewDataSource {
     
-    //テーブルビューの行数　検索結果にあわせる
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return searchCompleter.results.count
     }
-    
-    //ここでcellの使用を決定している。検索結果 .resultsに"MKLocationSearchCompletion"が内包、これをテーブルビューに表示
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) //再利用するセルを生成
-            cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
 
-        
-        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! CustomTableViewCell //再利用するセルを生成
         let completion = searchCompleter.results[indexPath.row] //searchCompleterを実行、実行結果にindexPath.rowで通し番号を渡す
-        print(searchCompleter.results[0])
         cell.textLabel?.text = completion.title //　セルのラベルに、取得データのタイトルを
         cell.detailTextLabel?.text = completion.subtitle // セルのdetailedLabelに、取得データのサブタイトルを生成
         return cell
@@ -96,25 +94,28 @@ extension RouteCandidateViewController: UITableViewDelegate, UITableViewDataSour
     
     //cellが選択された時の処理
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print("\(indexPath.row)番セルが押されたよ！")
         //下記　前のビューからMainViewインスタンスを取得(モーダル⇨タブバー⇨メインと入れ子上に取得してる)
-        let tab = self.presentingViewController as! UITabBarController
-        let vc = tab.selectedViewController as! MainViewController
+        
         let selectedPoint = searchCompleter.results[indexPath.row].title //選択されたセルのタイトルを取得
-        vc.searchIdentifier = searchIdentifier // 開始地点と到着地点　どちらを検索したかの識別子をMainViewに返す
-        //返す先を選ぶ
+        print("TableViewCell \(selectedPoint) was selected")
+
+
+        //FIXME: storyboardの読み込みによる値渡し⇨プロトコルによる値渡しにリファクタリング
         if searchIdentifier == "departure" { //出発地点
-            vc.departurePointName = selectedPoint //出発地点の情報　上書き
-            vc.departureRequest = MKLocalSearch.Request(completion: searchCompleter.results[indexPath.row])
+            let departurePointName = selectedPoint //出発地点の情報　上書き
+            delegate?.handleSearch(pointName: departurePointName) //検索させる
+            print("departurePointName transported")
+            
         } else if searchIdentifier == "arrival" {//到着地点
-            vc.arrivalPointName = selectedPoint //到着地点の情報　上書き
-            vc.arrivalRequest = MKLocalSearch.Request(completion: searchCompleter.results[indexPath.row])
+            let arrivalPointName = selectedPoint
+            delegate?.handleSearch(pointName: arrivalPointName) //検索させる
+            print("arrivalPointName transported")
+            
         } else { //例外処理
             print("Identification was not successed")
             return
         }
-        vc.loadView() //dismissだと遷移元のライフサイクルが反応しないので、こっちで動かす
-        vc.viewDidLoad()
+        
         self.dismiss(animated: true, completion: nil) // Viewを閉じる。
     }
     

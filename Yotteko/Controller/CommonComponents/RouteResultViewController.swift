@@ -241,7 +241,7 @@ extension RouteResultViewController:MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didAdd views: [MKAnnotationView]) {
         print("latestPinnedPoint 座標")
         print(latestPinnedPoint.coordinate)
-        var region:MKCoordinateRegion = MKCoordinateRegion(center:latestPinnedPoint.coordinate, latitudinalMeters: 0.05, longitudinalMeters: 0.05)//縮尺を設定
+        let region:MKCoordinateRegion = MKCoordinateRegion(center:latestPinnedPoint.coordinate, latitudinalMeters: 0.05, longitudinalMeters: 0.05)//縮尺を設定
         mapView.setRegion(region,animated:false)
         
         view.addSubview(mapView)

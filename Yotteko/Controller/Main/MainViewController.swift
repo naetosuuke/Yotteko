@@ -20,15 +20,21 @@ import MapKit
 import CoreLocation
 
 
-class MainViewController: UIViewController, UISearchBarDelegate {
+class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateViewControllerDelegate {
     
     //MARK: - property
     
+    //
     let locationManager = CLLocationManager()
-    var userLocation = CLLocationCoordinate2D()
+    var userLocation: CLLocationCoordinate2D?
     var mapView = MKMapView()
     
+    //各種フラグ
+    var didStartUpdatingLocation = false //現在地情報の許可状況を判断　初期値false
+    var localGeoSearchFlag = true //GeoSearchをすると出発地点のMKMapItemが上書きされるので、自分で出発地点を選んだ時はfalseにする
+    
     var searchIdentifier = "blank"
+    var departureSearchButton: UIButton?
     var departurePointName = "現在地"
     var departureRequest: MKLocalSearch.Request?
     var departureMapItem: MKMapItem?
@@ -44,7 +50,7 @@ class MainViewController: UIViewController, UISearchBarDelegate {
         .strokeColor : UIColor.gray, // 縁取りの色
     ]
     
-    var didStartUpdatingLocation = false //初期値　false
+ 
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,34 +59,42 @@ class MainViewController: UIViewController, UISearchBarDelegate {
         //UI周りを表示
         generateView()
         generateMapView()
-                
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         generateCurrentLocationAnnotation()
-        generateAnnotation()
-        generateRoute()
+        print("このMapが読み込まれた際のlocalGeoSearchFlag = \(localGeoSearchFlag)")
+        ()
     }
     
     private func initLocation() { //invoke 呼び出す:  メインスレッドが動いている時、UIが動かなくなる原因になるかも
         switch CLLocationManager.authorizationStatus() { //現在地取得　許可ステータス　判別
-        case .notDetermined: //未許可の場合
-            //ユーザーが位置情報の許可をまだしていないので、位置情報許可のダイアログを表示する
+        case .notDetermined:
             locationManager.requestWhenInUseAuthorization() //quickhelp参照、位置情報の取得前に必ずこれを呼び出さないといけない
-        case .restricted, .denied: //断られている場合
-            showPermissionAlert() //許可をとるfunc実行
+            
+        case .restricted, .denied:
+            showPermissionAlert()
+        
         case .authorizedAlways, .authorizedWhenInUse: //許可済みの場合
             if !didStartUpdatingLocation{ //初期値 falseだったら(一回もアップデートしていなければ)
                 didStartUpdatingLocation = true //アップデート済み　へと変換
-                locationManager.startUpdatingLocation() //ロケーションの取得を開始
-                locationManager.delegate = self
-                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-                locationManager.distanceFilter = kCLDistanceFilterNone //どれだけ動いたら反応するか
-                guard let userLocation: CLLocationCoordinate2D = locationManager.location?.coordinate else { return }
-                print("initLocation()で取得したlocations (CLLocationCoordinate2D)= \(userLocation.latitude) \(userLocation.longitude)")
-                self.userLocation = userLocation
+                switch localGeoSearchFlag {
+                 
+                case true:
+                    locationManager.startUpdatingLocation() //ロケーションの取得を開始
+                    locationManager.delegate = self
+                    locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters //現在地の精度
+                    locationManager.distanceFilter = kCLDistanceFilterNone //どれだけ動いたら反応するか
+                    guard let userLocation: CLLocationCoordinate2D = locationManager.location?.coordinate else { return } //locationmanager.locationはオプショナルなのでアンラップ
+                    print("initLocation()で取得したlocations (CLLocationCoordinate2D)= \(userLocation.latitude) \(userLocation.longitude)")
+                    self.userLocation = userLocation
+                
+                default:
+                    return
+                }
             }
+        
         @unknown default:
             break
         }
@@ -94,100 +108,112 @@ class MainViewController: UIViewController, UISearchBarDelegate {
         departureView.frame = CGRect(x: 0, y: 60, width: view.frame.size.width, height: 60)
         departureView.backgroundColor = Colors.blueGreen
         view.addSubview(departureView)
+        
         //出発地点 検索ボタン
-        let departureSearchButton = UIButton(type: .system)
-        departureSearchButton.frame = CGRect(x: 80, y: 70, width: view.frame.size.width - 100, height: 40)
-        departureSearchButton.backgroundColor = .white
-        departureSearchButton.layer.cornerRadius = 10
-        departureSearchButton.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
-        let departureAttributedTitle = NSAttributedString(string: departurePointName, attributes: attributes)
-        departureSearchButton.setAttributedTitle(departureAttributedTitle, for: .normal)
-        //departureSearchButton.textAlignment = NSTextAlignment.center
-        view.addSubview(departureSearchButton)
-        departureSearchButton.addTarget(self, action: #selector(goDepartureRouteCandidate), for: .touchDown)
+        let departureSearchButton:UIButton = {
+            let button = UIButton(type: .system)
+            button.frame = CGRect(x: 80, y: 70, width: view.frame.size.width - 100, height: 40)
+            button.backgroundColor = .white
+            button.layer.cornerRadius = 10
+            button.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
+            let departureAttributedTitle = NSAttributedString(string: departurePointName, attributes: attributes)
+            button.setAttributedTitle(departureAttributedTitle, for: .normal)
+            //departureSearchButton.textAlignment = NSTextAlignment.center
+            view.addSubview(button)
+            button.addTarget(self, action: #selector(goDepartureRouteCandidate), for: .touchDown)
+            return button
+        }()
         
         //到着地点表示ビュー
         let arrivalView = UIView()
         arrivalView.frame = CGRect(x: 0, y: 120, width: view.frame.size.width, height: 60)
         arrivalView.backgroundColor = Colors.bluePurple
         view.addSubview(arrivalView)
+        
         //到着地点 検索ボタン
-        let arrivalSearchButton = UIButton(type: .system)
-        arrivalSearchButton.frame = CGRect(x: 80, y: 130, width: view.frame.size.width - 100, height: 40)
-        arrivalSearchButton.backgroundColor = .white
-        arrivalSearchButton.layer.cornerRadius = 10
-        arrivalSearchButton.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
-        let arrivalAttributedTitle = NSAttributedString(string: arrivalPointName, attributes: attributes)
-        arrivalSearchButton.setAttributedTitle(arrivalAttributedTitle, for: .normal)
-        //arrivalSearchButton.textAlignment = NSTextAlignment.center
-        view.addSubview(arrivalSearchButton)
-        arrivalSearchButton.addTarget(self, action: #selector(goArrivalRouteCandidate), for: .touchDown) //selectorでクロージャ外の関数を呼ぶ時は、シャープ？
+        let arrivalSearchButton: UIButton = {
+            let button = UIButton(type: .system)
+            button.frame = CGRect(x: 80, y: 130, width: view.frame.size.width - 100, height: 40)
+            button.backgroundColor = .white
+            button.layer.cornerRadius = 10
+            button.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
+            let arrivalAttributedTitle = NSAttributedString(string: arrivalPointName, attributes: attributes)
+            button.setAttributedTitle(arrivalAttributedTitle, for: .normal)
+            //arrivalSearchButton.textAlignment = NSTextAlignment.center
+            view.addSubview(button)
+            button.addTarget(self, action: #selector(goArrivalRouteCandidate), for: .touchDown) //selectorでクロージャ外の関数を呼ぶ時は、シャープ？
+            return button
+        }()
         
+        
+            
         //現在地点 currentlocation 表示ボタン
-        let currentLocationButton = UIButton(type: .system)
-        currentLocationButton.frame = CGRect(x: 20, y: 70, width: 40, height: 40)
-        currentLocationButton.backgroundColor = .white
-        currentLocationButton.layer.cornerRadius = 10
-        currentLocationButton.setImage(UIImage(systemName: "mappin.and.ellipse"), for: .normal)
-        currentLocationButton.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
-        view.addSubview(currentLocationButton)
-        //currentLocationButton.addTarget(self, action: #selector(****), for: .touchDown)
+        let currentLocationButton: UIButton = {
+            let button = UIButton(type: .system)
+            button.frame = CGRect(x: 20, y: 70, width: 40, height: 40)
+            button.backgroundColor = .white
+            button.layer.cornerRadius = 10
+            button.setImage(UIImage(systemName: "mappin.and.ellipse"), for: .normal)
+            button.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
+            view.addSubview(button)
+            button.addTarget(self, action:#selector(handleCenterLocation), for: .touchDown)
+            self.localGeoSearchFlag = true
+            return button
+        }()
+            
         //到着地点  randomlocation ランダム表示ボタン
-        let randomLocationButton = UIButton(type: .system)
-        randomLocationButton.frame = CGRect(x: 20, y: 130, width: 40, height: 40)
-        randomLocationButton.backgroundColor = .white
-        randomLocationButton.layer.cornerRadius = 10
-        randomLocationButton.setImage(UIImage(systemName: "dice"), for: .normal)
-        randomLocationButton.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
-        view.addSubview(randomLocationButton)
-        //currentLocationButton.addTarget(self, action: #selector(****), for: .touchDown)
-        //Helpボタン(初回起動時に出る操作方法を、もう一度出す)
-        let helpButton = UIButton(type: .system)
-        helpButton.frame = CGRect(x: view.frame.size.width - 85, y: view.frame.size.height - 185, width: 100, height: 100)
-        helpButton.setImage(UIImage(systemName: "questionmark.circle"), for: .normal)
-        helpButton.tintColor =  .white
-        view.addSubview(helpButton)
-        helpButton.addTarget(self, action: #selector(goHelp), for: .touchDown) //selectorでクロージャ外の関数を呼ぶ時は、シャープ？
-    }
+        let randomLocationButton: UIButton = {
+            let button = UIButton(type: .system)
+            button.frame = CGRect(x: 20, y: 130, width: 40, height: 40)
+            button.backgroundColor = .white
+            button.layer.cornerRadius = 10
+            button.setImage(UIImage(systemName: "dice"), for: .normal)
+            button.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
+            view.addSubview(button)
+            return button
+            //currentLocationButton.addTarget(self, action: #selector(****), for: .touchDown)
+        }()
         
+        //Helpボタン(初回起動時に出る操作方法を、もう一度出す)
+        let helpButton: UIButton = {
+            let button = UIButton(type: .system)
+            button.frame = CGRect(x: view.frame.size.width - 85, y: view.frame.size.height - 185, width: 100, height: 100)
+            button.setImage(UIImage(systemName: "questionmark.circle"), for: .normal)
+            button.tintColor =  .white
+            button.addTarget(self, action: #selector(goHelp), for: .touchDown) //selectorでクロージャ外の関数を呼ぶ時は、シャープ？
+            view.addSubview(button)
+            return button
+        }()
+    }
+    
     private func generateMapView() { //地図を描写するメソッド
         mapView.frame = CGRect(x: 0, y: 180, width: view.frame.size.width, height: view.frame.size.height - 180)
         mapView.delegate = self
         mapView.showsUserLocation = true
         mapView.mapType = .standard
-        //mapView.userTrackingMode = .follow
-        
-        // Region is the coordinate and span of the map.
-        // Region may be modified to fit the aspect ratio of the view using regionThatFits:.
-        let region = MKCoordinateRegion(center: userLocation, latitudinalMeters: 0.5, longitudinalMeters: 0.5)//縮尺を設定
+        guard let userLocation = userLocation else { return } //現在地　アンラップ
+        let region = MKCoordinateRegion(center: userLocation, latitudinalMeters: 2000, longitudinalMeters: 2000)//縮尺を設定
         mapView.setRegion(region, animated:true)
         view.addSubview(mapView)
-        
     }
 
-    //MARK: - configure currentlocation
+    
+    //MARK: - configure Annotation & Route
     
     private func generateCurrentLocationAnnotation(){
-        print("逆ジオコーダーの引数 CLLocation取得前 userLocation \(self.userLocation)")
-        let currentLocation = CLLocation(latitude: self.userLocation.latitude, longitude: self.userLocation.longitude)
+    
+        guard let currentLocation = locationManager.location else {return} //現在地　オプショナルなのでアンラップ
         //↓この処理　検索結果(戻り値 -> MKMapItem)がでるより先に処理が飛ばされている
-        print("リバースジオコーダー検索開始")
         CLGeocoder().reverseGeocodeLocation(currentLocation, completionHandler: {(placemarks, error) in
             if error == nil {
                 //CLLocationで取得している現在地を、Geocoderで検索(最終的に、ルート作成用のMKMapを作りたい)
-                print("リバースジオコーダー検索結果")
-                
-                
                 guard var departureMapItem = self.departureMapItem else {return}
                 self.searchIdentifier = "departure_currentlocation"  //初期値書き換え
-                self.mapView.removeAnnotations(self.mapView.annotations)
+                self.removeAnnotarions()
                 let currentPlacemark:CLPlacemark = (placemarks?[0])! //CLPlacemark型
-                print("CKPlacemark 情報 \(currentPlacemark)")
                 //検索結果　placemark(CLPlacemark型)を MKPlacemarkにキャスト
                 let placemark = MKPlacemark(placemark: currentPlacemark) //CLPlacemarkをMKPlacemarkにコンバートする
-                print("MKPlacemark(コンバート後)　情報 \(placemark)")
                 departureMapItem = MKMapItem(placemark: placemark)
-                print("MKMapItem(コンバート後)　座標情報 \(departureMapItem.placemark.coordinate)")
                 departureMapItem.name = "現在地"
                 let departurePoint = MKPointAnnotation()
                 departurePoint.coordinate = departureMapItem.placemark.coordinate
@@ -198,45 +224,66 @@ class MainViewController: UIViewController, UISearchBarDelegate {
                 print("現在地アノテーション設置　完了")
             }
         })
-    }
+     }
     
 
+
+    private func centerMapOnUserLocation() { //現在地ボタンのselectorの中身
+        guard let coordinates = locationManager.location?.coordinate else { return }
+        let coordinateRegion = MKCoordinateRegion(center: coordinates, latitudinalMeters: 2000, longitudinalMeters: 2000)
+        mapView.setRegion(coordinateRegion, animated: true)
+        self.generateCurrentLocationAnnotation()
+        self.departurePointName = "現在地"
+        let departureAttributedTitle = NSAttributedString(string: self.departurePointName, attributes: attributes)
+        if let button = self.departureSearchButton {
+            button.setAttributedTitle(departureAttributedTitle, for: .normal)
+            view.addSubview(button)
+        }
+    }
+    
+    
+    func handleSearch(pointName: String) {
+        print("searchIdentifier = \(searchIdentifier)")
+        
+        switch self.searchIdentifier {
+        case "departure":
+            self.departurePointName = pointName
+
+        case "arrival":
+            self.arrivalPointName = pointName
+
+        default:
+            return
+        }
+        removeAnnotarions()//アノテーション情報を初期化
+        print("removing check annotation\(self.mapView.annotations)")
+        generateAnnotation()
+    }
+    
     
     
     private func generateAnnotation() {
-        
-        print(searchIdentifier) //検索結果の座標情報が出発地、到着地のどちらかを確認する
-        
-        
-        
+
+        print("searchIdentifier = \(searchIdentifier)") //検索結果の座標情報が出発地、到着地のどちらかを確認する®
         //出発地点検索結果を表示する
-        if searchIdentifier == "departure" { //目的地点検索検索結果
-            print("departureRequestの中身確認")
-            print(departureRequest)
-            guard let departureRequest = self.departureRequest else { return }
+        if self.searchIdentifier == "departure" { //目的地点検索検索結果
+            mapView.showsUserLocation = false //現在地情報　消す
+            let departureRequest = MKLocalSearch.Request()
+            departureRequest.naturalLanguageQuery = departurePointName //検索ワード
+
             let departureSearch = MKLocalSearch(request: departureRequest)
-            print("request入手前　検索前に保存されているアノテーション\(self.mapView.annotations)")
-            self.mapView.removeAnnotations(self.mapView.annotations)
-            print("request入手後　アノテーションの削除済んんでいる？\(self.mapView.annotations)")
-            
-            /*
-             MKLocalSearch　非同期処理なので、処理が終わるまでawaitさせる
-             
-            */
-            
-            print("MKLocalsearch 引数departure 検索開始")
             departureSearch.start(completionHandler: { (response, error) in
-                    //エラーハンドリング　表示必要
                     response?.mapItems.forEach { item in //mapItems　responseがもってる
                         //検索結果のDeparturePointを表示
-                        print("MKLocalsearch 引数departure 検索完了")
-                        print(item)
+                        print("MKLocalsearch departure result \(self.departurePointName)")
                         self.departureMapItem = item //MKMapItem型データを代入
                         let departurePoint = MKPointAnnotation()
                         departurePoint.coordinate = item.placemark.coordinate
                         departurePoint.title = item.name
                         self.latestPinnedPoint = departurePoint
                         self.mapView.addAnnotation(departurePoint)
+                        
+                        
                         //最後に取得したArrivalPointを表示
                         let arrivalPoint = MKPointAnnotation()
                         guard let arrivalMapItem = self.arrivalMapItem else {return}
@@ -244,6 +291,7 @@ class MainViewController: UIViewController, UISearchBarDelegate {
                         arrivalPoint.title = arrivalMapItem.placemark.title
                         self.mapView.addAnnotation(arrivalPoint)
                         print("出発地アノテーション設置　完了")
+                        self.generateRoute()
                         
                     }
                 })
@@ -254,7 +302,7 @@ class MainViewController: UIViewController, UISearchBarDelegate {
             let arrivalSearch = MKLocalSearch(request: arrivalRequest)
             
             print("request入手前　検索前に保存されているアノテーション\(self.mapView.annotations)")
-            self.mapView.removeAnnotations(self.mapView.annotations)
+            removeAnnotarions()
             print("request入手後　アノテーションの削除済んんでいる？\(self.mapView.annotations)")
             
             /*
@@ -268,7 +316,7 @@ class MainViewController: UIViewController, UISearchBarDelegate {
                     print("MKLocalsearch 引数arrival 検索完了")
                     print(item)
                     //検索結果のDeparturePointを表示
-                    self.mapView.removeAnnotations(self.mapView.annotations)
+                    self.removeAnnotarions()
                     self.arrivalMapItem = item //MKMapItem型データを代入
                     let arrivalPoint = MKPointAnnotation()
                     arrivalPoint.coordinate = item.placemark.coordinate
@@ -282,10 +330,11 @@ class MainViewController: UIViewController, UISearchBarDelegate {
                     departurePoint.title = departureMapItem.placemark.title
                     self.mapView.addAnnotation(departurePoint)
                     print("目的地アノテーション設置　完了")
+                    self.generateRoute()
                 }
             })
         } else { // searchIdentifierがない場合(画面が遷移されていない場合)
-            print("searchIdentifierに値が設定されていないため、出発地(検索結果)、目的地アノテーション設置は行われませんでした。")
+            print("localsearch was not arranged this time")
         }
             self.mapView.showAnnotations(self.mapView.annotations, animated: true) //アノテーションをMapにのせる
     }
@@ -293,15 +342,13 @@ class MainViewController: UIViewController, UISearchBarDelegate {
     
     private func generateRoute() {
         
-        print("route作成前にdepartureMapItemもっているか")
-        print(departureMapItem?.name)
-        print("route作成前にarrivalMapItemもっているか")
-        print(arrivalMapItem?.name)
+        print("route作成前にdepartureMapItemもっているか→\(departureMapItem?.name)")
+        print("route作成前にarrivalMapItemもっているか→\(arrivalMapItem?.name)")
         
         
         //現在地と到着地点の両方が選択されている場合
         if departureMapItem?.name != "Unknown Location" && arrivalMapItem?.name != "Unknown Location" {
-            mapView.removeAnnotations(self.mapView.annotations) //　検索結果のロジックから出てくるアノテーションを初期化
+            removeAnnotarions()
             print("generateRoute annotationsが削除できているか確認")
             print(self.mapView.annotations)
             var placemarks = [MKMapItem]() //MKDirections.Requestインスタンスに渡すMKMapItemの配列を作成
@@ -333,11 +380,31 @@ class MainViewController: UIViewController, UISearchBarDelegate {
         }
     }
     
+    func removeAnnotarions(){ //アノテーション削除
+        mapView.annotations.forEach {(annotation) in //mapViewがもってるannotationに繰り返し処理　処理はまたクロージャで記載
+            if let annotation = annotation as? MKPointAnnotation { //MKPointAnnotation方のアノテーションのみ選択（こうしないと現在地も消える）
+                mapView.removeAnnotation(annotation) //mapViewから削除
+            }
+        }
+    }
     
+    
+    //MARK: - selector
+
+    @objc func handleCenterLocation() {
+        self.localGeoSearchFlag = true
+        print("localGeoSearchFlag is changed to true")
+        centerMapOnUserLocation()
+    }
     @objc func goDepartureRouteCandidate(){ //Segueを作動させるメソッド
+        self.localGeoSearchFlag = false
+        print("localGeoSearchFlag is changed to \(localGeoSearchFlag)")
+        self.searchIdentifier = "departure"
         performSegue(withIdentifier: "goRouteCandidate", sender: "departure")
+
     }
     @objc func goArrivalRouteCandidate(){
+        self.searchIdentifier = "arrival"
         performSegue(withIdentifier: "goRouteCandidate", sender: "arrival")
     }
     @objc func goHelp(){
@@ -366,12 +433,19 @@ class MainViewController: UIViewController, UISearchBarDelegate {
 
 // MARK: - CLLocationManagerDelegate
 extension MainViewController: CLLocationManagerDelegate { //位置情報を取得(更新を検知)した際に起動するdelegateメソッド
-
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print("位置の更新を取得")
-        guard let userLocation: CLLocationCoordinate2D = manager.location?.coordinate else { return }
-        //print("locations = \(userLocation.latitude) \(userLocation.longitude)")
-        self.userLocation = userLocation
+        switch localGeoSearchFlag {
+            case false:
+                print("位置情報は上書きされませんでした")
+                return
+            
+            default:    //出発地点　任意で取得している際は自動更新を止める
+                guard let userLocation: CLLocationCoordinate2D = manager.location?.coordinate else { return }
+                self.userLocation = userLocation
+                print("位置の更新を取得")
+            
+        }
+
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -382,7 +456,8 @@ extension MainViewController: CLLocationManagerDelegate { //位置情報を取�
         present(alert, animated: true, completion: nil)
     }
     
-//MARK: Utility
+    
+//MARK: - Permission
     private func showPermissionAlert(){ //位置情報の取得
         //位置情報が制限されている/拒否されている
         let alert = UIAlertController(title: "位置情報の取得", message: "設定アプリから位置情報の使用を許可して下さい。", //アラートコントローラ初期化
@@ -408,16 +483,16 @@ extension MainViewController: CLLocationManagerDelegate { //位置情報を取�
 }
 
 
-//MARK:MKMapViewDelegate
+//MARK: - MKMapViewDelegate
 
 extension MainViewController:MKMapViewDelegate {
         
-    //ピンが押された時のDeleagteメソッド
+    //ピンが押された時のDeleagteメソッド 現在地が更新されるたびにRegionが変わるのはきつい
     func mapView(_ mapView: MKMapView, didAdd views: [MKAnnotationView]) {
-        print("latestPinnedPoint 座標")
+
         guard let latestPinnedPoint = self.latestPinnedPoint else {return}
-        print(latestPinnedPoint.coordinate)
-        var region:MKCoordinateRegion = MKCoordinateRegion(center:latestPinnedPoint.coordinate, latitudinalMeters: 0.05, longitudinalMeters: 0.05)//縮尺を設定
+        print("latestPinnedPoint 座標 = \(latestPinnedPoint.coordinate)")
+        let region:MKCoordinateRegion = MKCoordinateRegion(center:latestPinnedPoint.coordinate, latitudinalMeters: 2000, longitudinalMeters: 2000)//縮尺を設定
         mapView.setRegion(region,animated:false)
         view.addSubview(mapView)
     }

@@ -19,8 +19,9 @@ class CustomTableViewCell: UITableViewCell {
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: .subtitle, reuseIdentifier: reuseIdentifier )
+        super.init(style: .subtitle, reuseIdentifier: "cell" )
     }
+    
     required init?(coder aDecoder: NSCoder) { //これがないと起動しない。理由は後で調べる
         fatalError("init(coder:) has not been implemented")
     }
