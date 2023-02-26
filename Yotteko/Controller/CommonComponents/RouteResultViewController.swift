@@ -23,7 +23,9 @@ class RouteResultViewController: UIViewController {
     
     let colors = Colors()
     private var mapView = MKMapView()
+    var departurePointName: String?
     var departureMapItem = MKMapItem()
+    var arrivalPointName: String?
     var arrivalMapItem = MKMapItem()
     var latestPinnedPoint = MKPointAnnotation() //最後におされたピンのCoordinateを記録、
     let attributes: [NSAttributedString.Key : Any] = [
@@ -49,7 +51,7 @@ class RouteResultViewController: UIViewController {
     private func generateView() { // Mapのトップより上の高さ　50  contentviewのトップより下の長さ　200  モーダルで隠れている分　110(筐体でズレあり)
         
         let contentView = UIView()
-        contentView.frame = CGRect(x: 10, y: view.frame.size.height - 200 - 100, width: view.frame.size.width - 20, height: 200) //横　view通り、縦340
+        contentView.frame = CGRect(x: 10, y: view.frame.size.height - 200 - 100 - 200, width: view.frame.size.width - 20, height: 200 + 200) //横　view通り、縦340
         contentView.backgroundColor = .white
         contentView.layer.cornerRadius = 30 //角をまるめる
         view.addSubview(contentView) // viewの上にcontentViewをのせている
@@ -65,8 +67,8 @@ class RouteResultViewController: UIViewController {
         let labelFont = UIFont.systemFont(ofSize: 15, weight: .heavy) //これからつくるラベルのパラメータを作成
 
         
-        setUpLabel("出発地: ", frame: CGRect(x: 20, y: 0, width: 200, height: 30), font: labelFont, color: .black, contentView)
-        setUpLabel("目的地: ", frame: CGRect(x: 20, y: 20, width: 200, height: 30), font: labelFont, color: .black, contentView)
+        setUpLabel("出発地: \(departurePointName!)", frame: CGRect(x: 20, y: 0, width: 200, height: 30), font: labelFont, color: .black, contentView)
+        setUpLabel("目的地: \(arrivalPointName!)", frame: CGRect(x: 20, y: 20, width: 200, height: 30), font: labelFont, color: .black, contentView)
         setUpLabel("経由地 1", frame: CGRect(x: 20, y: 40, width: 200, height: 30), font: labelFont, color: .black, contentView)
         setUpLabel("経由地 2", frame: CGRect(x: 20, y: 60, width: 200, height: 30), font: labelFont, color: .black, contentView)
         setUpLabel("経由地 3", frame: CGRect(x: 20, y: 80, width: 200, height: 30), font: labelFont, color: .black, contentView)
@@ -76,7 +78,7 @@ class RouteResultViewController: UIViewController {
     }
     
     private func generateMapView() { //地図を描写するメソッド
-        mapView.frame = CGRect(x: 0, y: 50, width: view.frame.size.width, height: view.frame.size.height - 50 - 200 - 110)
+        mapView.frame = CGRect(x: 0, y: 50, width: view.frame.size.width, height: view.frame.size.height - 50 - 200 - 110 - 200)
         mapView.delegate = self
         // mapView.showsUserLocation = true
         // mapView.mapType = .standard
