@@ -21,13 +21,16 @@ import MapKit
 
 class RouteResultViewController: UIViewController {
     
-    let colors = Colors()
     private var mapView = MKMapView()
     var departurePointName: String?
     var departureMapItem = MKMapItem()
     var arrivalPointName: String?
     var arrivalMapItem = MKMapItem()
-    var latestPinnedPoint = MKPointAnnotation() //最後におされたピンのCoordinateを記録、
+    
+    var contentView: UIView?
+    var distance: CLLocationDistance?
+    var expectedTravelTime: TimeInterval?
+    let latestPinnedPoint = MKPointAnnotation() //最後におされたピンのCoordinateを記録、
     let attributes: [NSAttributedString.Key : Any] = [
         .font : UIFont.systemFont(ofSize: 12.0, weight: .heavy), // 文字色
         .foregroundColor : UIColor.darkGray, // カラー
@@ -45,40 +48,74 @@ class RouteResultViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         generateAnnotation()
-        generateRoute()
     }
     
     private func generateView() { // Mapのトップより上の高さ　50  contentviewのトップより下の長さ　200  モーダルで隠れている分　110(筐体でズレあり)
         
         let contentView = UIView()
-        contentView.frame = CGRect(x: 10, y: view.frame.size.height - 200 - 100 - 200, width: view.frame.size.width - 20, height: 200 + 200) //横　view通り、縦340
+        contentView.frame = CGRect(x: 10, y: view.frame.size.height - 200 - 100 - 100, width: view.frame.size.width - 20, height: 200 + 100) //横　view通り、縦340
         contentView.backgroundColor = .white
         contentView.layer.cornerRadius = 30 //角をまるめる
+        self.contentView = contentView
         view.addSubview(contentView) // viewの上にcontentViewをのせている
         
         let topLabel = UILabel()
         topLabel.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: 50)
-        topLabel.text = "作成済みの経路一覧"
+        topLabel.text = "作成済みの経路"
         topLabel.textColor = .white
         topLabel.center.x = view.center.x
         topLabel.textAlignment = .center
         view.addSubview(topLabel)
         
+
+    }
+    
+    private func setLabels() {
+        
+        guard let contentView = self.contentView else { return }
         let labelFont = UIFont.systemFont(ofSize: 15, weight: .heavy) //これからつくるラベルのパラメータを作成
+        
+        //経路の距離　型変換+四捨五入
+        guard var distance = distance else { return }
+        distance = distance as Double
+        let distanceKm = round(distance / 10) / 100//round関数は整数の値で四捨五入する。
+        
+        
+        //経路の移動時間 徒歩4km/h,自転車12km/h, 車は地図のタイプをかえないといけないので後日実装
+        guard let time = self.expectedTravelTime else { return }
+        let hour = Int(time/3600)
+        let minutes = (time - Double(hour * 3600))/60
+        let cycleTime = time / 3
+        let cycleHour = Int(cycleTime/3600)
+        let cycleMinutes = (cycleTime - Double(cycleHour * 3600))/60
+        
+        setUpLabel("出発地: \(departurePointName!)", frame: CGRect(x: 20, y: 20, width: contentView.frame.width - 40, height: 40), font: labelFont, color: .black, contentView)
+        setUpLabel("目的地: \(arrivalPointName!)", frame: CGRect(x: 20, y: 50, width: contentView.frame.width - 40, height: 40), font: labelFont, color: .black, contentView)
+        setUpLabel("距離:\(distanceKm)km", frame: CGRect(x: 20, y: 90, width: 150, height: 20), font: labelFont, color: .black, contentView)
+        setUpLabel("時間:徒歩     \(hour) 時間 \(String(format: "%.0f", minutes))分", frame: CGRect(x: view.center.x - 30, y: 90, width: 200, height: 20), font: labelFont, color: .black, contentView)
+        setUpLabel("自転車 \(cycleHour) 時間 \(String(format: "%.0f", cycleMinutes))分", frame: CGRect(x: view.center.x + 4, y: 110, width: 200, height: 20), font: labelFont, color: .black, contentView)
+        //setUpLabel("移動時間(車) \(hour) 時間 \(String(format: "%.0f", minutes))分", frame: CGRect(x: view.center.x - 60, y: 160, width: 200, height: 20), font: labelFont, color: .black, contentView)
+        
 
         
-        setUpLabel("出発地: \(departurePointName!)", frame: CGRect(x: 20, y: 0, width: 200, height: 30), font: labelFont, color: .black, contentView)
-        setUpLabel("目的地: \(arrivalPointName!)", frame: CGRect(x: 20, y: 20, width: 200, height: 30), font: labelFont, color: .black, contentView)
-        setUpLabel("経由地 1", frame: CGRect(x: 20, y: 40, width: 200, height: 30), font: labelFont, color: .black, contentView)
-        setUpLabel("経由地 2", frame: CGRect(x: 20, y: 60, width: 200, height: 30), font: labelFont, color: .black, contentView)
-        setUpLabel("経由地 3", frame: CGRect(x: 20, y: 80, width: 200, height: 30), font: labelFont, color: .black, contentView)
-        setUpLabel("経由地 4", frame: CGRect(x: 20, y: 100, width: 200, height: 30), font: labelFont, color: .black, contentView)
-        setUpLabel("経由地 5", frame: CGRect(x: 20, y: 120, width: 200, height: 30), font: labelFont, color: .black, contentView)
+        //setUpLabel("距離 km", frame: CGRect(x: 20, y: 120, width: 100, height: 20), font: labelFont, color: .black, contentView)
+        //setUpLabel("移動時間(徒歩) X h X m", frame: CGRect(x: view.center.x - 60, y: 120, width: 200, height: 20), font: labelFont, color: .black, contentView)
+        
+        //setUpLabel("経由地: Y", frame: CGRect(x: 20, y: 150, width: view.frame.width - 40, height: 40), font: labelFont, color: .black, contentView)
+        
+        //setUpLabel("距離 km", frame: CGRect(x: 20, y: 180, width: 100, height: 20), font: labelFont, color: .black, contentView)
+        //setUpLabel("移動時間(徒歩) X h X m", frame: CGRect(x: view.center.x - 60, y: 180, width: 200, height: 20), font: labelFont, color: .black, contentView)
+        
+        //setUpLabel("目的地: \(arrivalPointName!)", frame: CGRect(x: 20, y: 210, width: view.frame.width - 40, height: 40), font: labelFont, color: .black, contentView)
+        //setUpLabel("合計距離 km", frame: CGRect(x: 20, y: 240, width: 100, height: 20), font: labelFont, color: .black, contentView)
+        //setUpLabel("合計移動時間(徒歩) X h X m", frame: CGRect(x: view.center.x - 60, y: 240, width: 200, height: 20), font: labelFont, color: .black, contentView)
+        setUpLabel("------------------------------", frame: CGRect(x: 20, y: 240, width: view.frame.width - 40, height: 20), font: labelFont, color: .black, contentView)
+        
         
     }
     
     private func generateMapView() { //地図を描写するメソッド
-        mapView.frame = CGRect(x: 0, y: 50, width: view.frame.size.width, height: view.frame.size.height - 50 - 200 - 110 - 200)
+        mapView.frame = CGRect(x: 0, y: 50, width: view.frame.size.width, height: view.frame.size.height - 50 - 200 - 110 - 100)
         mapView.delegate = self
         // mapView.showsUserLocation = true
         // mapView.mapType = .standard
@@ -92,101 +129,23 @@ class RouteResultViewController: UIViewController {
     
     
     private func generateAnnotation() {
-        /*
-         print(searchIdentifier) //検索結果の座標情報が出発地、到着地のどちらかを確認する
-         
-         //出発地点検索結果を表示する
-         if searchIdentifier == "departure" { //目的地点検索検索結果
-         print("departureRequestの中身確認")
-         print(departureRequest)
-         let departureSearch = MKLocalSearch(request: departureRequest)
-         print("request入手前　検索前に保存されているアノテーション\(self.mapView.annotations)")
-         self.mapView.removeAnnotations(self.mapView.annotations)
-         print("request入手後　アノテーションの削除済んんでいる？\(self.mapView.annotations)")
-         
-         /*
-          MKLocalSearch　非同期処理なので、処理が終わるまでawaitさせる
-          
-          */
-         
-         print("MKLocalsearch 引数departure 検索開始")
-         departureSearch.start(completionHandler: { (response, error) in
-         //エラーハンドリング　表示必要
-         response?.mapItems.forEach { item in //mapItems　responseがもってる
-         //検索結果のDeparturePointを表示
-         print("MKLocalsearch 引数departure 検索完了")
-         print(item)
-         self.departureMapItem = item //MKMapItem型データを代入
-         let departurePoint = MKPointAnnotation()
-         departurePoint.coordinate = item.placemark.coordinate
-         departurePoint.title = item.name
-         self.latestPinnedPoint = departurePoint
-         self.mapView.addAnnotation(departurePoint)
-         //最後に取得したArrivalPointを表示
-         let arrivalPoint = MKPointAnnotation()
-         arrivalPoint.coordinate = self.arrivalMapItem.placemark.coordinate
-         arrivalPoint.title = self.arrivalMapItem.placemark.title
-         self.mapView.addAnnotation(arrivalPoint)
-         print("出発地アノテーション設置　完了")
-         
-         }
-         })
-         } else if searchIdentifier == "arrival" { //到着地点検索結果　アノテーションを表示する
-         print("arrivalRequestの中身確認")
-         print(arrivalRequest)
-         let arrivalSearch = MKLocalSearch(request: arrivalRequest)
-         
-         print("request入手前　検索前に保存されているアノテーション\(self.mapView.annotations)")
-         self.mapView.removeAnnotations(self.mapView.annotations)
-         print("request入手後　アノテーションの削除済んんでいる？\(self.mapView.annotations)")
-         
-         /*
-          MKLocalSearch　非同期処理なので、処理が終わるまでawaitさせる
-          
-          */
-         
-         print("MKLocalsearch 引数arrival 検索開始")
-         arrivalSearch.start(completionHandler: { (response, error) in
-         //エラーハンドリング　表示必要
-         response?.mapItems.forEach { item in //mapItems　responseがもってる
-         print("MKLocalsearch 引数arrival 検索完了")
-         print(item)
-         //検索結果のDeparturePointを表示
-         self.mapView.removeAnnotations(self.mapView.annotations)
-         self.arrivalMapItem = item //MKMapItem型データを代入
-         let arrivalPoint = MKPointAnnotation()
-         arrivalPoint.coordinate = item.placemark.coordinate
-         arrivalPoint.title = item.name
-         self.latestPinnedPoint = arrivalPoint
-         self.mapView.addAnnotation(arrivalPoint)
-         //最後に取得したArrivalPointを表示
+         //前画面から引用したMapItemから、アノテーション設置
          let departurePoint = MKPointAnnotation()
          departurePoint.coordinate = self.departureMapItem.placemark.coordinate
          departurePoint.title = self.departureMapItem.placemark.title
          self.mapView.addAnnotation(departurePoint)
-         print("目的地アノテーション設置　完了")
-         }
-         })
-         } else { // searchIdentifierがない場合(画面が遷移されていない場合)
-         print("searchIdentifierに値が設定されていないため、出発地(検索結果)、目的地アノテーション設置は行われませんでした。")
-         }
-         self.mapView.showAnnotations(self.mapView.annotations, animated: true) //アノテーションをMapにのせる
-         */
+
+         let arrivalPoint = MKPointAnnotation()
+         arrivalPoint.coordinate = self.arrivalMapItem.placemark.coordinate
+         arrivalPoint.title = self.arrivalMapItem.placemark.title
+         self.mapView.addAnnotation(arrivalPoint)
+    
+         self.mapView.showAnnotations(self.mapView.annotations, animated: true)
+        self.generateRoute()
         
     }
     
     private func generateRoute() {
-        
-        print("route作成前にdepartureMapItemもっているか")
-        print(departureMapItem)
-        print("route作成前にarrivalMapItemもっているか")
-        print(arrivalMapItem)
-        
-        
-        //現在地と到着地点の両方が選択されている場合
-        mapView.removeAnnotations(self.mapView.annotations) //　検索結果のロジックから出てくるアノテーションを初期化
-        print("generateRoute annotationsが削除できているか確認")
-        print(self.mapView.annotations)
         var placemarks = [MKMapItem]() //MKDirections.Requestインスタンスに渡すMKMapItemの配列を作成
         placemarks.append(self.departureMapItem)
         // ~~ここに寄り道の検索結果　MapItemを取得
@@ -204,7 +163,11 @@ class RouteResultViewController: UIViewController {
                 direction.calculate(completionHandler: {(response, error) in //calculateメソッドを開始
                     if error == nil { //エラーが出なければ
                         myRoute = response?.routes[0] //respoce?routes[0] を代入
+                        self.distance = myRoute.distance
+                        self.expectedTravelTime = myRoute.expectedTravelTime
                         self.mapView.addOverlay(myRoute.polyline, level: .aboveRoads) //mapViewに描写
+                        print("ルート描写完了")
+                        self.setLabels()
                     }
                 })
             }
@@ -218,21 +181,11 @@ class RouteResultViewController: UIViewController {
         label.frame = frame
         label.font = font
         label.textColor = color
+        label.numberOfLines = 0
         parentView.addSubview(label) //のせる下のViewを宣言
         
     }
     
-    
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) { //検索ボタンの識別コード(sender)を渡している どっちのボタンかで検索結果を返す先を分岐させる
-        // ②Segueの識別子確認
-        if segue.identifier == "goRouteCandidate" {
-            // ③遷移先ViewCntrollerの取得
-            let nextView = segue.destination as! RouteCandidateViewController
-            // ④値の設定
-            nextView.searchIdentifier = sender as! String
-        }
-    }
 }
 
 
@@ -241,13 +194,7 @@ class RouteResultViewController: UIViewController {
 extension RouteResultViewController:MKMapViewDelegate {
     //ピンが押された時のDeleagteメソッド
     func mapView(_ mapView: MKMapView, didAdd views: [MKAnnotationView]) {
-        print("latestPinnedPoint 座標")
-        print(latestPinnedPoint.coordinate)
-        let region:MKCoordinateRegion = MKCoordinateRegion(center:latestPinnedPoint.coordinate, latitudinalMeters: 0.05, longitudinalMeters: 0.05)//縮尺を設定
-        mapView.setRegion(region,animated:false)
-        
-        view.addSubview(mapView)
-        
+
     }
     //アノテーションのパラメーターを設定するDelegateメソッド？
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {

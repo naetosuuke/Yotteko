@@ -66,9 +66,14 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        generateCurrentLocationAnnotation()
+        
+        if localGeoSearchFlag == true {
+            generateCurrentLocationAnnotation()
+        } else {
+            generateAnnotation()
+        }
+        
         print("このMapが読み込まれた際のlocalGeoSearchFlag = \(localGeoSearchFlag)")
-        ()
     }
     
     private func initLocation() { //invoke 呼び出す:  メインスレッドが動いている時、UIが動かなくなる原因になるかも
@@ -202,19 +207,19 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
     //MARK: - configure Annotation & Route
     
     private func generateCurrentLocationAnnotation(){
-    
+        
+        
         guard let currentLocation = locationManager.location else {return} //現在地　オプショナルなのでアンラップ
         //↓この処理　検索結果(戻り値 -> MKMapItem)がでるより先に処理が飛ばされている
         CLGeocoder().reverseGeocodeLocation(currentLocation, completionHandler: {(placemarks, error) in
             if error == nil {
                 //CLLocationで取得している現在地を、Geocoderで検索(最終的に、ルート作成用のMKMapを作りたい)
-                guard var departureMapItem = self.departureMapItem else {return}
                 self.searchIdentifier = "departure_currentlocation"  //初期値書き換え
                 self.removeAnnotarions()
                 let currentPlacemark:CLPlacemark = (placemarks?[0])! //CLPlacemark型
                 //検索結果　placemark(CLPlacemark型)を MKPlacemarkにキャスト
                 let placemark = MKPlacemark(placemark: currentPlacemark) //CLPlacemarkをMKPlacemarkにコンバートする
-                departureMapItem = MKMapItem(placemark: placemark)
+                var departureMapItem = MKMapItem(placemark: placemark)
                 departureMapItem.name = "現在地"
                 self.departureMapItem = departureMapItem
                 let departurePoint = MKPointAnnotation()
@@ -251,7 +256,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
     }
     
     
-    func handleSearch(pointName: String) {
+    func handleSearch(pointName: String) { //
         print("searchIdentifier = \(searchIdentifier)")
         
         switch self.searchIdentifier {
@@ -430,6 +435,9 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         //modalVC.delegate = self
         modalVC.departurePointName = self.departurePointName
         modalVC.arrivalPointName = self.arrivalPointName
+        modalVC.departureMapItem = self.departureMapItem!
+        modalVC.arrivalMapItem = self.arrivalMapItem!
+        
         
         present(modalVC, animated: true, completion: nil)
     }
@@ -499,15 +507,12 @@ extension MainViewController:MKMapViewDelegate {
     //ピンが押された時のDeleagteメソッド 現在地が更新されるたびにRegionが変わるのはきつい
     func mapView(_ mapView: MKMapView, didAdd views: [MKAnnotationView]) {
 
-        //guard let latestPinnedPoint = self.latestPinnedPoint else {return}
-        //print("latestPinnedPoint 座標 = \(latestPinnedPoint.coordinate)")
-        //let region:MKCoordinateRegion = MKCoordinateRegion(center:latestPinnedPoint.coordinate, latitudinalMeters: 2000, longitudinalMeters: 2000)//縮尺を設定
-        //mapView.setRegion(region,animated:false)
-        //view.addSubview(mapView)
+
     }
     
     //アノテーションのパラメーターを設定するDelegateメソッド？
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
         let reuseId = "pin"
         var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId)
         if pinView == nil {

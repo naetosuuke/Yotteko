@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MapKit
 
 class GeneratedRouteViewController: UIViewController {
     
@@ -37,20 +38,17 @@ class GeneratedRouteViewController: UIViewController {
         
     }
     
-    @objc func goRouteResult(){
-        performSegue(withIdentifier: "goRouteResult", sender: nil)
+    @objc func goRouteResult(selectedDeparturePointName: String, selectedArrivalPointName: String, selectedDepartureMapItem: MKMapItem, selectedArrivalMapItem: MKMapItem){
+        let modalVC = RouteResultViewController()
+        //modalVC.delegate = self
+        modalVC.departurePointName = selectedDeparturePointName
+        modalVC.arrivalPointName = selectedArrivalPointName
+        modalVC.departureMapItem = selectedDepartureMapItem
+        modalVC.arrivalMapItem = selectedArrivalMapItem
+        
+        present(modalVC, animated: true, completion: nil)
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) { //検索ボタンの識別コード(sender)を渡している どっちのボタンかで検索結果を返す先を分岐させる
-        // ②Segueの識別子確認
-        if segue.identifier == "goRouteResult" {
-            // ③遷移先ViewCntrollerの取得
-            let nextView = segue.destination as! RouteResultViewController
-            // ④値の設定
-            //nextView.searchIdentifier = sender as! String
-        }
-    }
-
 }
 
 
@@ -75,7 +73,10 @@ extension GeneratedRouteViewController: UITableViewDelegate, UITableViewDataSour
     //cellが選択された時の処理
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("\(indexPath.row)番セルが押されたよ！")
-        goRouteResult()
+        
+        //FIXME: Realmに保存した検索結果をフェッチし、キャストしてRouteResultVCに代入する
+        
+        goRouteResult(selectedDeparturePointName: <#String#>, selectedArrivalPointName: <#String#>, selectedDepartureMapItem: <#MKMapItem#>, selectedArrivalMapItem: <#MKMapItem#>)
         
         
         //departureSearchButton.addTarget(self, action: #selector(goDepartureRouteCandidate), for: .touchDown)
