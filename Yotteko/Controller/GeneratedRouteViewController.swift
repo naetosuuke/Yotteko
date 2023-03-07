@@ -76,7 +76,7 @@ extension GeneratedRouteViewController: UITableViewDelegate, UITableViewDataSour
         
         //FIXME: Realmに保存した検索結果をフェッチし、キャストしてRouteResultVCに代入する
         
-        goRouteResult(selectedDeparturePointName: <#String#>, selectedArrivalPointName: <#String#>, selectedDepartureMapItem: <#MKMapItem#>, selectedArrivalMapItem: <#MKMapItem#>)
+        //goRouteResult(selectedDeparturePointName: <#String#>, selectedArrivalPointName: <#String#>, selectedDepartureMapItem: <#MKMapItem#>, selectedArrivalMapItem: <#MKMapItem#>)
         
         
         //departureSearchButton.addTarget(self, action: #selector(goDepartureRouteCandidate), for: .touchDown)

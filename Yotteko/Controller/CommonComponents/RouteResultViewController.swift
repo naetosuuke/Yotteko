@@ -109,7 +109,7 @@ class RouteResultViewController: UIViewController {
         //setUpLabel("目的地: \(arrivalPointName!)", frame: CGRect(x: 20, y: 210, width: view.frame.width - 40, height: 40), font: labelFont, color: .black, contentView)
         //setUpLabel("合計距離 km", frame: CGRect(x: 20, y: 240, width: 100, height: 20), font: labelFont, color: .black, contentView)
         //setUpLabel("合計移動時間(徒歩) X h X m", frame: CGRect(x: view.center.x - 60, y: 240, width: 200, height: 20), font: labelFont, color: .black, contentView)
-        setUpLabel("------------------------------", frame: CGRect(x: 20, y: 240, width: view.frame.width - 40, height: 20), font: labelFont, color: .black, contentView)
+        setUpLabel("------------------------------", frame: CGRect(x: 20, y: 160, width: view.frame.width - 40, height: 20), font: labelFont, color: .black, contentView)
         
         
     }
@@ -117,13 +117,7 @@ class RouteResultViewController: UIViewController {
     private func generateMapView() { //地図を描写するメソッド
         mapView.frame = CGRect(x: 0, y: 50, width: view.frame.size.width, height: view.frame.size.height - 50 - 200 - 110 - 100)
         mapView.delegate = self
-        // mapView.showsUserLocation = true
-        // mapView.mapType = .standard
-        // mapView.userTrackingMode = .follow
-        
-        // Region is the coordinate and span of the map.
-        // Region may be modified to fit the aspect ratio of the view using regionThatFits:.
-        // mapView.setRegion(region, animated:true)
+
         view.addSubview(mapView)
     }
     

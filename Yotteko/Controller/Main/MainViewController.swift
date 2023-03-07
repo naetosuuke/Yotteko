@@ -18,6 +18,7 @@
 import UIKit
 import MapKit
 import CoreLocation
+import FloatingPanel
 
 
 class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateViewControllerDelegate {
@@ -28,6 +29,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
     let locationManager = CLLocationManager()
     var userLocation: CLLocationCoordinate2D?
     var mapView = MKMapView()
+    var fpc = FloatingPanelController()
     
     //各種フラグ
     var didStartUpdatingLocation = false //現在地情報の許可状況を判断　初期値false
@@ -57,6 +59,8 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //FloatingPanel デリゲート設定
+        //fpc.delegate = self
         // 位置情報取得の許可状況を確認
         initLocation()
         //UI周りを表示
@@ -168,26 +172,30 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         }()
             
         //到着地点  randomlocation ランダム表示ボタン
-        let randomLocationButton: UIButton = {
+        let GenerateRouteButton: UIButton = {
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 20, y: 130, width: 40, height: 40)
             button.backgroundColor = .white
             button.layer.cornerRadius = 10
-            button.setImage(UIImage(systemName: "dice"), for: .normal)
+            button.setImage(UIImage(systemName: "repeat"), for: .normal)
             button.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
             view.addSubview(button)
+            button.addTarget(self, action: #selector(generateRoute), for: .touchDown)
             return button
-            //currentLocationButton.addTarget(self, action: #selector(****), for: .touchDown)
+
         }()
         
         //Helpボタン(初回起動時に出る操作方法を、もう一度出す)
         let helpButton: UIButton = {
             let button = UIButton(type: .system)
-            button.frame = CGRect(x: view.frame.size.width - 85, y: view.frame.size.height - 185, width: 100, height: 100)
+            button.frame = CGRect(x: 20, y: 10, width: 40, height: 40)
+            button.backgroundColor = Colors.lightblue
+            button.tintColor = .white
+            button.layer.cornerRadius = 10
+            button.clipsToBounds = true //LabelのRadiusを設定する場合は、これ必要
             button.setImage(UIImage(systemName: "questionmark.circle"), for: .normal)
-            button.tintColor =  .white
             button.addTarget(self, action: #selector(goHelp), for: .touchDown) //selectorでクロージャ外の関数を呼ぶ時は、シャープ？
-            view.addSubview(button)
+            mapView.addSubview(button)
             return button
         }()
     }
@@ -347,7 +355,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
     }
     
     
-    private func generateRoute() {
+    @objc func generateRoute() {
         
 
         //現在地と到着地点の両方が選択されている場合
@@ -424,11 +432,16 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         present(modalVC, animated: true, completion: nil)
 
     }
+    //FIXME:　操作方法画面
+   
     @objc func goHelp(){
+        
         let modalVC = HelpViewController()
-        //modalVC.delegate = self
-        present(modalVC, animated: true, completion: nil)
+        
+        fpc.set(contentViewController: modalVC)
+        fpc.addPanel(toParent: self)
     }
+    
     
     @objc func goRouteResult(){
         let modalVC = RouteResultViewController()
@@ -534,3 +547,40 @@ extension MainViewController:MKMapViewDelegate {
     }
     
 }
+
+/*
+
+// MARK: - FloatingPanel Delegate
+extension MainViewController: FloatingPanelControllerDelegate {
+   
+   // カスタマイズしたレイアウトに変更
+    func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
+       return CustomFloatingPanelLayout()
+   }
+}
+
+// MARK: - FloatingPanel Layout
+class CustomFloatingPanelLayout: FloatingPanelLayout {
+   
+   // 初期位置
+   var initialPosition: FloatingPanelPosition {
+       return .tip
+   }
+   
+   // カスタマイズした高さ
+   func insetFor(position: FloatingPanelPosition) -> CGFloat? {
+       switch position {
+       case .full: return 216.0
+       case .half: return 216.0
+       case .tip: return 44.0
+       default: return nil
+       }
+   }
+   
+   // サポートする位置
+   var supportedPositions: Set<FloatingPanelPosition> {
+       return [.full, .half, .tip]
+   }
+}
+
+*/
