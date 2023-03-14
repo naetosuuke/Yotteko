@@ -14,6 +14,7 @@
 //selfをつけるとグローバル変数が上書きされる
 //selfをつけないと、クロージャ内での変更は破棄される
 
+//  gonna implement after release
 
 import UIKit
 import MapKit
@@ -437,6 +438,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
     @objc func goHelp(){
         
         let modalVC = HelpViewController()
+        fpc.isRemovalInteractionEnabled = true
         
         fpc.set(contentViewController: modalVC)
         fpc.addPanel(toParent: self)
@@ -490,7 +492,7 @@ extension MainViewController: CLLocationManagerDelegate { //位置情報を取�
 //MARK: - Permission
     private func showPermissionAlert(){ //位置情報の取得
         //位置情報が制限されている/拒否されている
-        let alert = UIAlertController(title: "位置情報の取得", message: "設定アプリから位置情報の使用を許可して下さい。", //アラートコントローラ初期化
+        let alert = UIAlertController(title: "位置情報の取得", message: "設定アプリから位置情報の使用を許可して下さい。(経路検索時、現在地を表示します。)", //アラートコントローラ初期化
                                       preferredStyle: .alert)
         let goToSetting = UIAlertAction(title: "設定アプリを開く", style: .default) { _ in //アラートのアクションを初期化
             guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else { //設定画面に遷移するURLを代入
@@ -500,6 +502,7 @@ extension MainViewController: CLLocationManagerDelegate { //位置情報を取�
             if UIApplication.shared.canOpenURL(settingsUrl) { // URLを開けることができれば
                 UIApplication.shared.open(settingsUrl, completionHandler: nil) //移動する
             }
+            
         }
         let cancelAction = UIAlertAction(title: NSLocalizedString("キャンセル", comment: ""), style: .cancel) { (_) in //通知のキャンセルアクション
             self.dismiss(animated: true, completion: nil) //モーダルを下げる
@@ -548,39 +551,7 @@ extension MainViewController:MKMapViewDelegate {
     
 }
 
-/*
 
-// MARK: - FloatingPanel Delegate
-extension MainViewController: FloatingPanelControllerDelegate {
-   
-   // カスタマイズしたレイアウトに変更
-    func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
-       return CustomFloatingPanelLayout()
-   }
-}
 
-// MARK: - FloatingPanel Layout
-class CustomFloatingPanelLayout: FloatingPanelLayout {
-   
-   // 初期位置
-   var initialPosition: FloatingPanelPosition {
-       return .tip
-   }
-   
-   // カスタマイズした高さ
-   func insetFor(position: FloatingPanelPosition) -> CGFloat? {
-       switch position {
-       case .full: return 216.0
-       case .half: return 216.0
-       case .tip: return 44.0
-       default: return nil
-       }
-   }
-   
-   // サポートする位置
-   var supportedPositions: Set<FloatingPanelPosition> {
-       return [.full, .half, .tip]
-   }
-}
 
-*/
+

@@ -8,6 +8,8 @@
 // https://turedureengineer.hatenablog.com/entry/2018/12/06/170045
 //
 
+//  gonna implement after release
+
 
 import UIKit
 

@@ -5,6 +5,9 @@
 //  Created by Daisuke Doi on 2023/01/07.
 //
 
+//  gonna implement after release
+
+
 import UIKit
 import MapKit
 
