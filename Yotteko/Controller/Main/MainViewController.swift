@@ -25,8 +25,6 @@ import FloatingPanel
 class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateViewControllerDelegate {
     
     //MARK: - property
-    
-    //
     let locationManager = CLLocationManager()
     var userLocation: CLLocationCoordinate2D?
     var mapView = MKMapView()
@@ -63,6 +61,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         //FloatingPanel デリゲート設定
         //fpc.delegate = self
         // 位置情報取得の許可状況を確認
+        setupViews()
         initLocation()
         //UI周りを表示
         generateView()
@@ -81,36 +80,8 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         print("このMapが読み込まれた際のlocalGeoSearchFlag = \(localGeoSearchFlag)")
     }
     
-    private func initLocation() { //invoke 呼び出す:  メインスレッドが動いている時、UIが動かなくなる原因になるかも
-        switch CLLocationManager.authorizationStatus() { //現在地取得　許可ステータス　判別
-        case .notDetermined:
-            locationManager.requestWhenInUseAuthorization() //quickhelp参照、位置情報の取得前に必ずこれを呼び出さないといけない
-            
-        case .restricted, .denied:
-            showPermissionAlert()
-        
-        case .authorizedAlways, .authorizedWhenInUse: //許可済みの場合
-            if !didStartUpdatingLocation{ //初期値 falseだったら(一回もアップデートしていなければ)
-                didStartUpdatingLocation = true //アップデート済み　へと変換
-                switch localGeoSearchFlag {
-                 
-                case true:
-                    locationManager.startUpdatingLocation() //ロケーションの取得を開始
-                    locationManager.delegate = self
-                    locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters //現在地の精度
-                    locationManager.distanceFilter = kCLDistanceFilterNone //どれだけ動いたら反応するか
-                    guard let userLocation: CLLocationCoordinate2D = locationManager.location?.coordinate else { return } //locationmanager.locationはオプショナルなのでアンラップ
-                    print("initLocation()で取得したlocations (CLLocationCoordinate2D)= \(userLocation.latitude) \(userLocation.longitude)")
-                    self.userLocation = userLocation
-                
-                default:
-                    return
-                }
-            }
-        
-        @unknown default:
-            break
-        }
+    private func setupViews() {
+        locationManager.delegate = self
     }
     
     //MARK: - configure view
@@ -462,32 +433,61 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
     
 }
 
-
 // MARK: - CLLocationManagerDelegate
 extension MainViewController: CLLocationManagerDelegate { //位置情報を取得(更新を検知)した際に起動するdelegateメソッド
+    private func initLocation() { //invoke 呼び出す:  メインスレッドが動いている時、UIが動かなくなる原因になるかも
+        switch CLLocationManager().authorizationStatus { //現在地取得　許可ステータス　判別
+        case .notDetermined: // 許可してない
+            locationManager.requestWhenInUseAuthorization() //quickhelp参照、位置情報の取得前に必ずこれを呼び出さないといけない
+        case .restricted, .denied:
+            showPermissionAlert()
+        case .authorizedAlways, .authorizedWhenInUse: //許可済みの場合
+            getUserLocation()
+        default: fatalError()
+        }
+    }
+    
+    private func getUserLocation() {
+        locationManager.startUpdatingLocation() //ロケーションの取得を開始
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters //現在地の精度
+        locationManager.distanceFilter = kCLDistanceFilterNone //どれだけ動いたら反応するか
+        if let userLocation = locationManager.location?.coordinate {
+            self.userLocation = userLocation
+            print("initLocation()で取得したlocations (CLLocationCoordinate2D)= \(userLocation.latitude) \(userLocation.longitude)")
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        switch status {
+        case .authorizedAlways, .authorizedWhenInUse:
+            getUserLocation()
+            generateView()
+            generateMapView()
+        case .denied, .restricted, .notDetermined:
+            print("🟥位置情報の使用が拒否、制限、未設定です。")
+        default: fatalError()
+        }
+    }
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         switch localGeoSearchFlag {
             case false:
                 print("位置情報は上書きされませんでした")
                 return
-            
             default:    //出発地点　任意で取得している際は自動更新を止める
                 guard let userLocation: CLLocationCoordinate2D = manager.location?.coordinate else { return }
                 self.userLocation = userLocation
                 print("位置の更新を取得")
-            
         }
-
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         let alert = UIAlertController(title: nil, message: "位置情報の取得に失敗しました", preferredStyle: .alert)
-        alert.addAction(UIAlertAction.init(title: "OK", style: .default, handler: { (_) in
-            self.dismiss(animated: true, completion: nil)
+        alert.addAction(UIAlertAction.init(title: "OK", style: .default, handler: { _ in
+            self.dismiss(animated: true)
         }))
-        present(alert, animated: true, completion: nil)
+        present(alert, animated: true)
     }
-    
     
 //MARK: - Permission
     private func showPermissionAlert(){ //位置情報の取得
