@@ -93,8 +93,8 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         departureView.backgroundColor = Colors.blueGreen
         view.addSubview(departureView)
         
-        //出発地点 検索ボタン
-        let departureSearchButton:UIButton = {
+        //出発地点 検索ボタン departureSearchButton
+        let _:UIButton = {
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 80, y: 70, width: view.frame.size.width - 100, height: 40)
             button.backgroundColor = .white
@@ -113,8 +113,8 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         arrivalView.backgroundColor = Colors.bluePurple
         view.addSubview(arrivalView)
         
-        //到着地点 検索ボタン
-        let arrivalSearchButton:UIButton = {
+        //到着地点 検索ボタン arrivalSearchButton
+        let _:UIButton = {
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 80, y: 130, width: view.frame.size.width - 100, height: 40)
             button.backgroundColor = .white
@@ -130,7 +130,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         
             
         //現在地点 currentlocation 表示ボタン
-        let currentLocationButton: UIButton = {
+        let _: UIButton = {
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 20, y: 70, width: 40, height: 40)
             button.backgroundColor = .white
@@ -144,7 +144,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         }()
             
         //到着地点  randomlocation ランダム表示ボタン
-        let GenerateRouteButton: UIButton = {
+        let _: UIButton = {
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 20, y: 130, width: 40, height: 40)
             button.backgroundColor = .white
@@ -158,7 +158,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
         }()
         
         //Helpボタン(初回起動時に出る操作方法を、もう一度出す)
-        let helpButton: UIButton = {
+        let _: UIButton = {
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 20, y: 10, width: 40, height: 40)
             button.backgroundColor = Colors.lightblue
@@ -199,7 +199,7 @@ class MainViewController: UIViewController, UISearchBarDelegate, RouteCandidateV
                 let currentPlacemark:CLPlacemark = (placemarks?[0])! //CLPlacemark型
                 //検索結果　placemark(CLPlacemark型)を MKPlacemarkにキャスト
                 let placemark = MKPlacemark(placemark: currentPlacemark) //CLPlacemarkをMKPlacemarkにコンバートする
-                var departureMapItem = MKMapItem(placemark: placemark)
+                let departureMapItem = MKMapItem(placemark: placemark)
                 departureMapItem.name = "現在地"
                 self.departureMapItem = departureMapItem
                 let departurePoint = MKPointAnnotation()

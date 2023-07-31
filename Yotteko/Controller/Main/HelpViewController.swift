@@ -53,7 +53,8 @@ class HelpViewController: UIViewController {
         setUpLabel("上部の出発地点、到着地点ボタンを押し、検索画面から出発地点、到着地点の2点を選択してください。2点間の経路、所要時間、距離を表示します。", frame: CGRect(x: 20, y: 50, width: contentView.frame.width - 40, height: 40), font: labelFont, color: .black, contentView)
         setUpLabel("出発地点は、デフォルトで現在地となっています。", frame: CGRect(x: 20, y: 140, width: contentView.frame.width - 40, height: 40), font: labelFont, color: .black, contentView)
         
-        let currentLocationButton: UIButton = {
+        //currentLocationButton
+        let _: UIButton = {
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 15, y: 250, width: 40, height: 40)
             button.backgroundColor = .white
@@ -67,7 +68,8 @@ class HelpViewController: UIViewController {
         setUpLabel("出発地点を現在地に設定できます。", frame: CGRect(x: 50, y: 200, width: contentView.frame.width - 40, height: 40), font: labelFont, color: .black, contentView)
             
         //到着地点  randomlocation ランダム表示ボタン
-        let GenerateRouteButton: UIButton = {
+        //GenerateRouteButton
+        let _: UIButton = {
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 15, y:300, width: 40, height: 40)
             button.backgroundColor = .white

@@ -48,7 +48,8 @@ class OnlineRouteViewController: UIViewController {
         // ②Segueの識別子確認
         if segue.identifier == "goRouteResult" {
             // ③遷移先ViewCntrollerの取得
-            let nextView = segue.destination as! RouteResultViewController
+            //nextView
+            let _ = segue.destination as! RouteResultViewController
             // ④値の設定
             //nextView.searchIdentifier = sender as! String
         }
