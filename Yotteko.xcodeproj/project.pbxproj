@@ -68,6 +68,17 @@
 			path = CommonComponents;
 			sourceTree = "<group>";
 		};
+		50A08C6F2A8E1B9D00CCAA16 /* ScheduledToBeImplement */ = {
+			isa = PBXGroup;
+			children = (
+				50B7172B2969A55900EEA972 /* HelpViewController.swift */,
+				50B717252969730B00EEA972 /* OnlineRouteViewController.swift */,
+				50B71723296972FC00EEA972 /* GeneratedRouteViewController.swift */,
+				50B7171D296972CE00EEA972 /* TabBarViewController.swift */,
+			);
+			path = ScheduledToBeImplement;
+			sourceTree = "<group>";
+		};
 		50B716F92969726D00EEA972 = {
 			isa = PBXGroup;
 			children = (
@@ -120,25 +131,22 @@
 		50B7171C296972AC00EEA972 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				50B7171D296972CE00EEA972 /* TabBarViewController.swift */,
-				50B7172D2969A98900EEA972 /* Main */,
-				50B71723296972FC00EEA972 /* GeneratedRouteViewController.swift */,
-				50B717252969730B00EEA972 /* OnlineRouteViewController.swift */,
-				50B717272969731900EEA972 /* ConfigureViewController.swift */,
+				50B7172D2969A98900EEA972 /* MainView */,
+				50A08C6F2A8E1B9D00CCAA16 /* ScheduledToBeImplement */,
 				5050109C2973E5FF00E26C8B /* CommonComponents */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
 		};
-		50B7172D2969A98900EEA972 /* Main */ = {
+		50B7172D2969A98900EEA972 /* MainView */ = {
 			isa = PBXGroup;
 			children = (
+				50B717272969731900EEA972 /* ConfigureViewController.swift */,
 				50B717092969726D00EEA972 /* MainViewController.swift */,
 				50B7172E296ABEFD00EEA972 /* CustomTableViewCell.swift */,
 				50B7171F296972DE00EEA972 /* RouteCandidateViewController.swift */,
-				50B7172B2969A55900EEA972 /* HelpViewController.swift */,
 			);
-			path = Main;
+			path = MainView;
 			sourceTree = "<group>";
 		};
 		C734DEC4559CEA1B99F012DC /* Frameworks */ = {

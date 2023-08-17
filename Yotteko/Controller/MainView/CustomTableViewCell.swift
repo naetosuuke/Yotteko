@@ -10,12 +10,10 @@
 
 //  gonna implement after release
 
-
 import UIKit
 
+final class CustomTableViewCell: UITableViewCell {
 
-class CustomTableViewCell: UITableViewCell {
-    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
     }
@@ -23,11 +21,8 @@ class CustomTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: "cell" )
     }
-    
-    required init?(coder aDecoder: NSCoder) { //これがないと起動しない。理由は後で調べる
+
+    required init?(coder aDecoder: NSCoder) { // これがないと起動しない。理由は後で調べる
         fatalError("init(coder:) has not been implemented")
     }
-
 }
-
-
