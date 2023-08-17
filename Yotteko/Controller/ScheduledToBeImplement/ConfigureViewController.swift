@@ -9,8 +9,7 @@
 
 import UIKit
 
-class ConfigureViewController: UIViewController {
-
+final class ConfigureViewController: UIViewController {
     var tableView = UITableView()
     var cell = UITableViewCell()
 

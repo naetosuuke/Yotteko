@@ -13,7 +13,7 @@ protocol RouteCandidateViewControllerDelegate {
     func handleSearch(pointName: String)
 }
 
-class RouteCandidateViewController: UIViewController, UISearchBarDelegate {
+final class RouteCandidateViewController: UIViewController, UISearchBarDelegate {
 
     // MARK: - property
     var searchBar = UISearchBar()
@@ -26,7 +26,6 @@ class RouteCandidateViewController: UIViewController, UISearchBarDelegate {
     var delegate: RouteCandidateViewControllerDelegate?
 
     // MARK: init
-
     override func viewDidLoad() {
         super.viewDidLoad()
         print(searchIdentifier) //　MainViewController どちらからきたかで軽油を変えている

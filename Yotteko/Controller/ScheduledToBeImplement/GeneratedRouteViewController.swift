@@ -10,7 +10,7 @@
 import UIKit
 import MapKit
 
-class GeneratedRouteViewController: UIViewController {
+final class GeneratedRouteViewController: UIViewController {
 
     var tableView = UITableView()
     var cell = UITableViewCell()

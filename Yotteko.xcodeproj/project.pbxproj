@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		509E99E82A8E627C00C99D43 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509E99E72A8E627C00C99D43 /* MainView.swift */; };
+		509E99EA2A8E637900C99D43 /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509E99E92A8E637900C99D43 /* Character.swift */; };
+		509E99EC2A8E66C500C99D43 /* RouteResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509E99EB2A8E66C500C99D43 /* RouteResultView.swift */; };
 		50B717062969726D00EEA972 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B717052969726D00EEA972 /* AppDelegate.swift */; };
 		50B717082969726D00EEA972 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B717072969726D00EEA972 /* SceneDelegate.swift */; };
 		50B7170A2969726D00EEA972 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B717092969726D00EEA972 /* MainViewController.swift */; };
@@ -27,6 +30,9 @@
 
 /* Begin PBXFileReference section */
 		5000B9058E511D4238797F7D /* Pods-Yotteko.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Yotteko.release.xcconfig"; path = "Target Support Files/Pods-Yotteko/Pods-Yotteko.release.xcconfig"; sourceTree = "<group>"; };
+		509E99E72A8E627C00C99D43 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		509E99E92A8E637900C99D43 /* Character.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Character.swift; sourceTree = "<group>"; };
+		509E99EB2A8E66C500C99D43 /* RouteResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteResultView.swift; sourceTree = "<group>"; };
 		50B717022969726D00EEA972 /* Yotteko.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yotteko.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50B717052969726D00EEA972 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50B717072969726D00EEA972 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -71,6 +77,7 @@
 		50A08C6F2A8E1B9D00CCAA16 /* ScheduledToBeImplement */ = {
 			isa = PBXGroup;
 			children = (
+				50B717272969731900EEA972 /* ConfigureViewController.swift */,
 				50B717252969730B00EEA972 /* OnlineRouteViewController.swift */,
 				50B71723296972FC00EEA972 /* GeneratedRouteViewController.swift */,
 				50B7171D296972CE00EEA972 /* TabBarViewController.swift */,
@@ -114,6 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				50B717292969732700EEA972 /* Colors.swift */,
+				509E99E92A8E637900C99D43 /* Character.swift */,
 			);
 			path = Method;
 			sourceTree = "<group>";
@@ -123,6 +131,8 @@
 			children = (
 				50B7170B2969726D00EEA972 /* Main.storyboard */,
 				50B717102969726F00EEA972 /* LaunchScreen.storyboard */,
+				509E99E72A8E627C00C99D43 /* MainView.swift */,
+				509E99EB2A8E66C500C99D43 /* RouteResultView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -140,7 +150,6 @@
 		50B7172D2969A98900EEA972 /* MainView */ = {
 			isa = PBXGroup;
 			children = (
-				50B717272969731900EEA972 /* ConfigureViewController.swift */,
 				50B717092969726D00EEA972 /* MainViewController.swift */,
 				50B7172E296ABEFD00EEA972 /* CustomTableViewCell.swift */,
 				50B7171F296972DE00EEA972 /* RouteCandidateViewController.swift */,
@@ -282,10 +291,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				50B7172C2969A55900EEA972 /* HelpViewController.swift in Sources */,
+				509E99EC2A8E66C500C99D43 /* RouteResultView.swift in Sources */,
+				509E99E82A8E627C00C99D43 /* MainView.swift in Sources */,
 				50B71720296972DE00EEA972 /* RouteCandidateViewController.swift in Sources */,
 				50B7172A2969732700EEA972 /* Colors.swift in Sources */,
 				50B71724296972FC00EEA972 /* GeneratedRouteViewController.swift in Sources */,
 				50B71722296972ED00EEA972 /* RouteResultViewController.swift in Sources */,
+				509E99EA2A8E637900C99D43 /* Character.swift in Sources */,
 				50B7171E296972CE00EEA972 /* TabBarViewController.swift in Sources */,
 				50B7172F296ABEFD00EEA972 /* CustomTableViewCell.swift in Sources */,
 				50B7170A2969726D00EEA972 /* MainViewController.swift in Sources */,

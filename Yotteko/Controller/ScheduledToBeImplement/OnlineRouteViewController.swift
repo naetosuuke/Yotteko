@@ -9,7 +9,7 @@
 
 import UIKit
 
-class OnlineRouteViewController: UIViewController {
+final class OnlineRouteViewController: UIViewController {
 
     var tableView = UITableView()
     var cell = UITableViewCell()
