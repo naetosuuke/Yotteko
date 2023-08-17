@@ -71,7 +71,6 @@
 		50A08C6F2A8E1B9D00CCAA16 /* ScheduledToBeImplement */ = {
 			isa = PBXGroup;
 			children = (
-				50B7172B2969A55900EEA972 /* HelpViewController.swift */,
 				50B717252969730B00EEA972 /* OnlineRouteViewController.swift */,
 				50B71723296972FC00EEA972 /* GeneratedRouteViewController.swift */,
 				50B7171D296972CE00EEA972 /* TabBarViewController.swift */,
@@ -145,6 +144,7 @@
 				50B717092969726D00EEA972 /* MainViewController.swift */,
 				50B7172E296ABEFD00EEA972 /* CustomTableViewCell.swift */,
 				50B7171F296972DE00EEA972 /* RouteCandidateViewController.swift */,
+				50B7172B2969A55900EEA972 /* HelpViewController.swift */,
 			);
 			path = MainView;
 			sourceTree = "<group>";
